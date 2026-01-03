@@ -1,0 +1,95 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  passwordHash  String         @map("password_hash")
+  name          String
+  avatarUrl     String?        @map("avatar_url")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  ownedBoards   Board[]        @relation("BoardOwner")
+  boardMembers  BoardMember[]
+
+  @@map("users")
+}
+
+model Board {
+  id            String         @id @default(cuid())
+  title         String
+  description   String?
+  bgColor       String         @default("#0079BF") @map("bg_color")
+  ownerId       String         @map("owner_id")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  owner         User           @relation("BoardOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members       BoardMember[]
+  lists         List[]
+
+  @@index([ownerId])
+  @@map("boards")
+}
+
+model BoardMember {
+  id        String    @id @default(cuid())
+  boardId   String    @map("board_id")
+  userId    String    @map("user_id")
+  role      Role      @default(EDITOR)
+  joinedAt  DateTime  @default(now()) @map("joined_at")
+
+  board     Board     @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([boardId, userId])
+  @@index([userId])
+  @@map("board_members")
+}
+
+enum Role {
+  OWNER
+  EDITOR
+  VIEWER
+}
+
+model List {
+  id        String    @id @default(cuid())
+  title     String
+  boardId   String    @map("board_id")
+  position  Int
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  board     Board     @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  cards     Card[]
+
+  @@index([boardId])
+  @@map("lists")
+}
+
+model Card {
+  id          String    @id @default(cuid())
+  title       String
+  description String?   @db.Text
+  listId      String    @map("list_id")
+  position    Int
+  dueDate     DateTime? @map("due_date")
+  coverUrl    String?   @map("cover_url")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  list        List      @relation(fields: [listId], references: [id], onDelete: Cascade)
+
+  @@index([listId])
+  @@map("cards")
+}

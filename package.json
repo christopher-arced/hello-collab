@@ -1,0 +1,32 @@
+{
+  "name": "hello",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Real-time collaborative task management system",
+  "scripts": {
+    "dev": "concurrently \"pnpm dev:web\" \"pnpm dev:api\"",
+    "dev:web": "pnpm --filter @hello/web dev",
+    "dev:api": "pnpm --filter @hello/api dev",
+    "build": "pnpm -r build",
+    "build:web": "pnpm --filter @hello/web build",
+    "build:api": "pnpm --filter @hello/api build",
+    "lint": "pnpm -r lint",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "type-check": "pnpm -r type-check",
+    "prisma:generate": "pnpm --filter @hello/database prisma:generate",
+    "prisma:migrate": "pnpm --filter @hello/database prisma:migrate",
+    "prisma:studio": "pnpm --filter @hello/database prisma:studio"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.4",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}
