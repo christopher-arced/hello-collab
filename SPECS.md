@@ -234,7 +234,7 @@ A real-time collaborative task management application similar to Trello, where t
 - **Runtime:** Node.js 18+ with TypeScript
 - **Framework:** Express.js
 - **Real-time:** Socket.io
-- **ORM:** Prisma
+- **ORM:** Prisma 7.2.0 (with PostgreSQL adapter)
 - **Authentication:** JWT (jsonwebtoken, bcrypt)
 - **Validation:** Zod
 - **Email:** Resend (free tier: 3,000 emails/month)
@@ -243,7 +243,7 @@ A real-time collaborative task management application similar to Trello, where t
 #### Database
 
 - **Primary DB:** PostgreSQL
-- **Hosting:** Supabase (free tier: 500MB) or Neon (free tier: 3GB)
+- **Hosting:** ✅ Supabase (free tier: 500MB) - **CONFIGURED**
 
 #### Storage (Phase 2)
 
@@ -252,6 +252,7 @@ A real-time collaborative task management application similar to Trello, where t
 
 #### DevOps
 
+- **Monorepo:** ✅ pnpm workspaces - **CONFIGURED**
 - **Version Control:** Git + GitHub
 - **CI/CD:** GitHub Actions
 - **Testing:** Vitest (unit), Playwright (E2E)
@@ -354,6 +355,8 @@ A real-time collaborative task management application similar to Trello, where t
 
 ### 5.2 Prisma Schema (MVP)
 
+**Note:** Using Prisma 7.2.0 with PostgreSQL adapter for runtime connections.
+
 ```prisma
 // schema.prisma
 
@@ -363,7 +366,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("DATABASE_URL")  // Required for Prisma CLI commands
 }
 
 model User {
@@ -694,9 +697,11 @@ gray: { ...tailwind grays }
 **Week 1: Setup & Authentication**
 
 - [x] Initialize frontend (Vite + React + TypeScript)
-- [ ] Initialize backend (Express + TypeScript)
-- [ ] Set up PostgreSQL database (Supabase/Neon)
-- [ ] Configure Prisma ORM
+- [x] Initialize backend (Express + TypeScript)
+- [x] Set up PostgreSQL database (Supabase)
+- [x] Configure Prisma ORM (v7.2.0 with PostgreSQL adapter)
+- [x] Set up pnpm monorepo with workspaces
+- [x] Create shared packages (types, validation, config, database)
 - [ ] Implement user registration
 - [ ] Implement login with JWT
 - [ ] Create protected routes
@@ -993,19 +998,21 @@ gray: { ...tailwind grays }
 
 ### Immediate Actions (Before Coding)
 
-1. [ ] Review and approve these specifications
-2. [ ] Set up GitHub repository
-3. [ ] Create project board (GitHub Projects)
-4. [ ] Design mockups (Figma or sketch)
-5. [ ] Choose final name and branding
+1. [x] Review and approve these specifications
+2. [x] Set up GitHub repository
+3. [x] Create project board (GitHub Projects)
+4. [x] Design mockups (Figma or sketch)
+5. [x] Choose final name and branding (HelloCollab)
 
 ### First Code Commit
 
-1. [ ] Initialize monorepo or separate repos (frontend/backend)
-2. [ ] Set up linting and formatting (ESLint, Prettier)
-3. [ ] Configure TypeScript strict mode
-4. [ ] Create basic folder structure
-5. [ ] Set up development environment
+1. [x] Initialize monorepo with pnpm workspaces
+2. [x] Set up linting and formatting (ESLint, Prettier)
+3. [x] Configure TypeScript strict mode
+4. [x] Create basic folder structure (apps/, packages/)
+5. [x] Set up development environment
+6. [x] Configure Supabase database
+7. [x] Set up Prisma 7.2.0 with PostgreSQL adapter
 
 ---
 
@@ -1032,6 +1039,6 @@ gray: { ...tailwind grays }
 
 ---
 
-**Document Version:** 1.0
+**Document Version:** 1.1
 **Last Updated:** 2026-01-02
-**Status:** Ready for Development
+**Status:** ✅ Infrastructure Complete - Active Development

@@ -2,15 +2,24 @@
 
 A real-time collaborative task management application similar to Trello, built with modern web technologies. Teams can organize work into boards, lists, and cards with instant updates across all connected clients.
 
+> **📍 Current Status:** Infrastructure complete! Database configured, monorepo set up, ready for feature development.
+
 ## 🚀 Features
 
-### MVP (Phase 1)
-- ✅ User authentication (JWT)
-- ✅ Board, List, and Card management
-- ✅ Real-time collaboration via WebSocket
-- ✅ Drag-and-drop interface
-- ✅ Dark/light theme
-- ✅ Responsive design
+### ✅ Completed Setup
+- ✅ Monorepo architecture with pnpm workspaces
+- ✅ TypeScript strict mode configuration
+- ✅ Database schema designed and deployed (Supabase)
+- ✅ Shared type system across frontend and backend
+- ✅ Development environment ready
+
+### 🚧 In Progress (Phase 1 - MVP)
+- ⏳ User authentication (JWT)
+- ⏳ Board, List, and Card management
+- ⏳ Real-time collaboration via WebSocket
+- ⏳ Drag-and-drop interface
+- ⏳ Dark/light theme
+- ⏳ Responsive design
 
 ### Coming Soon (Phase 2)
 - Team collaboration with role-based permissions
@@ -38,8 +47,8 @@ A real-time collaborative task management application similar to Trello, built w
 - **Runtime:** Node.js 18+ with TypeScript
 - **Framework:** Express.js
 - **Real-time:** Socket.io
-- **ORM:** Prisma
-- **Database:** PostgreSQL
+- **ORM:** Prisma 7.2.0 (with PostgreSQL adapter)
+- **Database:** PostgreSQL (Supabase - ✅ Configured)
 - **Authentication:** JWT + bcrypt
 - **Validation:** Zod
 - **Deployment:** Render.com
@@ -104,11 +113,25 @@ pnpm install
 
 3. **Set up environment variables**
 
-Backend (.env):
+Create a `.env` file in `apps/api/`:
 ```bash
 cd apps/api
-cp .env.example .env
-# Edit .env with your database URL and JWT secret
+# Create .env file with your Supabase connection string
+```
+
+Example `.env`:
+```env
+PORT=3000
+NODE_ENV=development
+CORS_ORIGIN=http://localhost:5173
+DATABASE_URL="postgresql://postgres:[PASSWORD]@[HOST]:5432/postgres"
+JWT_SECRET=your-super-secret-jwt-key-change-this
+JWT_EXPIRES_IN=7d
+```
+
+Also copy the `.env` to the database package:
+```bash
+cp apps/api/.env packages/database/.env
 ```
 
 4. **Set up the database**
@@ -116,8 +139,10 @@ cp .env.example .env
 # Generate Prisma client
 pnpm prisma:generate
 
-# Run migrations
-pnpm prisma:migrate
+# Push schema to database (Prisma 7)
+cd packages/database
+pnpm prisma db push --url "$(grep '^DATABASE_URL=' .env | cut -d'=' -f2- | sed 's/^"//;s/"$//')"
+cd ../..
 ```
 
 5. **Start development servers**
@@ -150,21 +175,31 @@ pnpm type-check       # Type check all workspaces
 
 # Database
 pnpm prisma:generate  # Generate Prisma client
-pnpm prisma:migrate   # Run database migrations
 pnpm prisma:studio    # Open Prisma Studio
+
+# For schema changes (Prisma 7):
+cd packages/database
+pnpm prisma db push --url "$(grep '^DATABASE_URL=' .env | cut -d'=' -f2- | sed 's/^"//;s/"$//')"
 ```
 
 ## 🗄️ Database Schema
 
-The application uses PostgreSQL with the following main entities:
+**Status:** ✅ Configured with Supabase PostgreSQL
 
-- **Users**: User accounts with authentication
-- **Boards**: Top-level containers for organizing work
-- **Lists**: Vertical columns within boards
-- **Cards**: Individual task items within lists
-- **BoardMembers**: User permissions for boards (Phase 2)
+The application uses PostgreSQL with the following main entities (5 tables created):
+
+- **users**: User accounts with authentication
+- **boards**: Top-level containers for organizing work
+- **lists**: Vertical columns within boards
+- **cards**: Individual task items within lists
+- **board_members**: User permissions for boards (Phase 2)
 
 See `packages/database/prisma/schema.prisma` for the complete schema.
+
+**Prisma 7.2.0 Configuration:**
+- Runtime: PostgreSQL adapter (`@prisma/adapter-pg`)
+- CLI: Database URL via `--url` flag
+- Connection pooling: `pg` driver
 
 ## 🔒 Environment Variables
 
@@ -239,10 +274,13 @@ pnpm test:e2e
 4. Add environment variables
 5. Deploy
 
-### Database (Supabase/Neon)
-1. Create a PostgreSQL database
-2. Copy connection string to `DATABASE_URL`
-3. Run migrations: `pnpm prisma:migrate`
+### Database (Supabase)
+✅ **Already configured!**
+
+For new environments:
+1. Create a Supabase PostgreSQL database
+2. Copy connection string to `DATABASE_URL` in `.env` files
+3. Push schema: `cd packages/database && pnpm prisma db push --url "..."`
 
 ## 🤝 Contributing
 
@@ -264,4 +302,10 @@ This project is licensed under the MIT License.
 
 ---
 
-**Note:** This project is currently in active development. See `SPECS.md` for the complete technical specifications and roadmap.
+## 📋 Project Status
+
+**Infrastructure:** ✅ Complete
+**Database:** ✅ Configured (Supabase PostgreSQL)
+**Next:** Implementing authentication and core features
+
+See `SPECS.md` for the complete technical specifications and detailed roadmap.
