@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
-import { prisma } from '@hello/database'
+import { prisma, type User as PrismaUser } from '@hello/database'
 import type { RegisterInput } from '@hello/validation'
 import type { User, AuthTokens } from '@hello/types'
 
@@ -44,6 +44,6 @@ export async function createUser(data: RegisterInput): Promise<Omit<User, 'passw
   return user
 }
 
-export async function findUserByEmail(email: string) {
+export async function findUserByEmail(email: string): Promise<PrismaUser | null> {
   return prisma.user.findUnique({ where: { email } })
 }
