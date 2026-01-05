@@ -2,18 +2,21 @@ import { z } from 'zod'
 
 // Auth Schemas
 export const registerSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  email: z.string().email('Invalid email address').toLowerCase(),
   password: z.string().min(8, 'Password must be at least 8 characters'),
-  name: z.string().min(2, 'Name must be at least 2 characters').max(50, 'Name must be less than 50 characters'),
+  name: z
+    .string()
+    .min(2, 'Name must be at least 2 characters')
+    .max(50, 'Name must be less than 50 characters'),
 })
 
 export const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  email: z.string().email('Invalid email address').toLowerCase(),
   password: z.string().min(1, 'Password is required'),
 })
 
 export const forgotPasswordSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  email: z.string().email('Invalid email address').toLowerCase(),
 })
 
 export const resetPasswordSchema = z.object({
@@ -29,14 +32,24 @@ export const updateProfileSchema = z.object({
 // Board Schemas
 export const createBoardSchema = z.object({
   title: z.string().min(1, 'Title is required').max(100, 'Title must be less than 100 characters'),
-  description: z.string().max(500, 'Description must be less than 500 characters').optional().nullable(),
-  bgColor: z.string().regex(/^#[0-9A-F]{6}$/i, 'Invalid color format').optional(),
+  description: z
+    .string()
+    .max(500, 'Description must be less than 500 characters')
+    .optional()
+    .nullable(),
+  bgColor: z
+    .string()
+    .regex(/^#[0-9A-F]{6}$/i, 'Invalid color format')
+    .optional(),
 })
 
 export const updateBoardSchema = z.object({
   title: z.string().min(1).max(100).optional(),
   description: z.string().max(500).optional().nullable(),
-  bgColor: z.string().regex(/^#[0-9A-F]{6}$/i).optional(),
+  bgColor: z
+    .string()
+    .regex(/^#[0-9A-F]{6}$/i)
+    .optional(),
 })
 
 // List Schemas
@@ -57,7 +70,11 @@ export const reorderListsSchema = z.object({
 // Card Schemas
 export const createCardSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200, 'Title must be less than 200 characters'),
-  description: z.string().max(5000, 'Description must be less than 5000 characters').optional().nullable(),
+  description: z
+    .string()
+    .max(5000, 'Description must be less than 5000 characters')
+    .optional()
+    .nullable(),
   position: z.number().int().nonnegative().optional(),
 })
 
@@ -79,7 +96,7 @@ export const reorderCardsSchema = z.object({
 
 // Board Member Schemas (Phase 2)
 export const addBoardMemberSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  email: z.string().email('Invalid email address').toLowerCase(),
   role: z.enum(['EDITOR', 'VIEWER']).optional(),
 })
 

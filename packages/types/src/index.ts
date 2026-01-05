@@ -68,6 +68,7 @@ export interface ApiResponse<T = unknown> {
   data?: T
   error?: string
   message?: string
+  details?: Record<string, string[]>
 }
 
 export interface PaginatedResponse<T> {
