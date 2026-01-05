@@ -41,6 +41,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@hello/database':
+        specifier: workspace:*
+        version: link:../../packages/database
       '@prisma/client':
         specifier: ^7.2.0
         version: 7.2.0(prisma@7.2.0(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(typescript@5.9.3)
