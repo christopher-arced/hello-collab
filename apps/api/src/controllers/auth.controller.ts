@@ -19,7 +19,7 @@ export async function register(req: Request, res: Response) {
   if (existingUser) {
     return res.status(409).json({
       success: false,
-      error: 'Invalid email or password',
+      error: 'Email already registered',
     })
   }
 

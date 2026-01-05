@@ -12,7 +12,11 @@ export async function hashPassword(password: string): Promise<string> {
 
 export function generateTokens(userId: string): AuthTokens {
   const expiresIn = process.env.JWT_EXPIRES_IN || '7d'
-  const accessToken = jwt.sign({ userId }, process.env.JWT_SECRET!, {
+  const secret = process.env.JWT_SECRET
+  if (!secret) {
+    throw new Error('JWT_SECRET environment variable is not set')
+  }
+  const accessToken = jwt.sign({ userId }, secret, {
     expiresIn: expiresIn as jwt.SignOptions['expiresIn'],
   })
   return { accessToken }
