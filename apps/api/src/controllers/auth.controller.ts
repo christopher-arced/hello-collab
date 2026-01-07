@@ -12,7 +12,7 @@ import {
 const COOKIE_OPTIONS = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
-  sameSite: 'strict' as const,
+  sameSite: 'lax' as const,
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
 }
 
@@ -118,7 +118,11 @@ export async function login(req: Request, res: Response) {
 }
 
 export async function logout(_req: Request, res: Response) {
-  res.clearCookie('accessToken', COOKIE_OPTIONS)
+  res.clearCookie('accessToken', {
+    httpOnly: COOKIE_OPTIONS.httpOnly,
+    secure: COOKIE_OPTIONS.secure,
+    sameSite: COOKIE_OPTIONS.sameSite,
+  })
 
   return res.status(200).json({
     success: true,

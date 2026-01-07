@@ -188,3 +188,192 @@ describe('POST /api/auth/register', () => {
     })
   })
 })
+
+describe('POST /api/auth/login', () => {
+  const app = createApp()
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    process.env.JWT_SECRET = 'test-secret'
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  describe('with valid credentials', () => {
+    it('should login and return 200 with user and tokens', async () => {
+      const mockUser = {
+        id: 'user-123',
+        email: 'test@example.com',
+        name: 'Test User',
+        passwordHash: 'hashed-password',
+        avatarUrl: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }
+      const mockTokens = { accessToken: 'mock.jwt.token' }
+
+      vi.mocked(authService.findUserByEmail).mockResolvedValue(mockUser)
+      vi.mocked(authService.verifyPassword).mockResolvedValue(true)
+      vi.mocked(authService.generateTokens).mockReturnValue(mockTokens)
+
+      const response = await request(app).post('/api/auth/login').send({
+        email: 'test@example.com',
+        password: 'Password123!',
+      })
+
+      expect(response.status).toBe(200)
+      expect(response.body).toEqual({
+        success: true,
+        data: {
+          user: expect.objectContaining({
+            id: 'user-123',
+            email: 'test@example.com',
+            name: 'Test User',
+          }),
+          tokens: mockTokens,
+        },
+      })
+      expect(response.body.data.user).not.toHaveProperty('passwordHash')
+    })
+
+    it('should set accessToken cookie on successful login', async () => {
+      const mockUser = {
+        id: 'user-123',
+        email: 'test@example.com',
+        name: 'Test User',
+        passwordHash: 'hashed-password',
+        avatarUrl: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }
+
+      vi.mocked(authService.findUserByEmail).mockResolvedValue(mockUser)
+      vi.mocked(authService.verifyPassword).mockResolvedValue(true)
+      vi.mocked(authService.generateTokens).mockReturnValue({ accessToken: 'mock.jwt.token' })
+
+      const response = await request(app).post('/api/auth/login').send({
+        email: 'test@example.com',
+        password: 'Password123!',
+      })
+
+      expect(response.headers['set-cookie']).toBeDefined()
+      expect(response.headers['set-cookie'][0]).toContain('accessToken=')
+    })
+  })
+
+  describe('with invalid credentials', () => {
+    it('should return 401 when email does not exist', async () => {
+      vi.mocked(authService.findUserByEmail).mockResolvedValue(null)
+
+      const response = await request(app).post('/api/auth/login').send({
+        email: 'nonexistent@example.com',
+        password: 'Password123!',
+      })
+
+      expect(response.status).toBe(401)
+      expect(response.body).toEqual({
+        success: false,
+        error: 'Invalid email or password',
+      })
+    })
+
+    it('should return 401 when password is incorrect', async () => {
+      const mockUser = {
+        id: 'user-123',
+        email: 'test@example.com',
+        name: 'Test User',
+        passwordHash: 'hashed-password',
+        avatarUrl: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }
+
+      vi.mocked(authService.findUserByEmail).mockResolvedValue(mockUser)
+      vi.mocked(authService.verifyPassword).mockResolvedValue(false)
+
+      const response = await request(app).post('/api/auth/login').send({
+        email: 'test@example.com',
+        password: 'WrongPassword123!',
+      })
+
+      expect(response.status).toBe(401)
+      expect(response.body).toEqual({
+        success: false,
+        error: 'Invalid email or password',
+      })
+    })
+  })
+
+  describe('with invalid data (validation failures)', () => {
+    it('should return 400 for missing email', async () => {
+      const response = await request(app).post('/api/auth/login').send({
+        password: 'Password123!',
+      })
+
+      expect(response.status).toBe(400)
+      expect(response.body).toMatchObject({
+        success: false,
+        error: 'Validation failed',
+      })
+      expect(response.body.details).toHaveProperty('email')
+    })
+
+    it('should return 400 for invalid email format', async () => {
+      const response = await request(app).post('/api/auth/login').send({
+        email: 'invalid-email',
+        password: 'Password123!',
+      })
+
+      expect(response.status).toBe(400)
+      expect(response.body).toMatchObject({
+        success: false,
+        error: 'Validation failed',
+      })
+      expect(response.body.details).toHaveProperty('email')
+    })
+
+    it('should return 400 for missing password', async () => {
+      const response = await request(app).post('/api/auth/login').send({
+        email: 'test@example.com',
+      })
+
+      expect(response.status).toBe(400)
+      expect(response.body).toMatchObject({
+        success: false,
+        error: 'Validation failed',
+      })
+      expect(response.body.details).toHaveProperty('password')
+    })
+  })
+})
+
+describe('POST /api/auth/logout', () => {
+  const app = createApp()
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('should return 200 with success message', async () => {
+    const response = await request(app).post('/api/auth/logout').send()
+
+    expect(response.status).toBe(200)
+    expect(response.body).toEqual({
+      success: true,
+      message: 'Logged out successfully',
+    })
+  })
+
+  it('should clear the accessToken cookie', async () => {
+    const response = await request(app).post('/api/auth/logout').send()
+
+    expect(response.headers['set-cookie']).toBeDefined()
+    expect(response.headers['set-cookie'][0]).toContain('accessToken=;')
+  })
+})
