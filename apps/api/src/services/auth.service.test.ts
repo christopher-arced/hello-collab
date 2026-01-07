@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
-import { hashPassword, generateTokens } from './auth.service'
+import { hashPassword, verifyPassword, generateTokens } from './auth.service'
 
 vi.mock('bcrypt')
 vi.mock('jsonwebtoken')
@@ -31,6 +31,26 @@ describe('auth.service', () => {
       const hash2 = await hashPassword('password2')
 
       expect(hash1).not.toBe(hash2)
+    })
+  })
+
+  describe('verifyPassword', () => {
+    it('should return true when password matches hash', async () => {
+      vi.mocked(bcrypt.compare).mockImplementation(() => Promise.resolve(true))
+
+      const result = await verifyPassword('password123', '$2b$10$hashedPassword')
+
+      expect(bcrypt.compare).toHaveBeenCalledWith('password123', '$2b$10$hashedPassword')
+      expect(result).toBe(true)
+    })
+
+    it('should return false when password does not match hash', async () => {
+      vi.mocked(bcrypt.compare).mockImplementation(() => Promise.resolve(false))
+
+      const result = await verifyPassword('wrongpassword', '$2b$10$hashedPassword')
+
+      expect(bcrypt.compare).toHaveBeenCalledWith('wrongpassword', '$2b$10$hashedPassword')
+      expect(result).toBe(false)
     })
   })
 
