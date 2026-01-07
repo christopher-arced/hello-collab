@@ -1,8 +1,13 @@
 import type { Request, Response } from 'express'
 import { Prisma } from '@prisma/client'
-import { registerSchema } from '@hello/validation'
-import type { ApiResponse, AuthResponse } from '@hello/types'
-import { createUser, generateTokens, findUserByEmail } from '../services/auth.service'
+import { registerSchema, loginSchema } from '@hello/validation'
+import type { ApiResponse, AuthResponse, User } from '@hello/types'
+import {
+  createUser,
+  generateTokens,
+  findUserByEmail,
+  verifyPassword,
+} from '../services/auth.service'
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
@@ -36,7 +41,6 @@ export async function register(req: Request, res: Response) {
     const user = await createUser({ email, password, name })
     const tokens = generateTokens(user.id)
 
-    // Set HTTP-only cookie for secure token storage
     res.cookie('accessToken', tokens.accessToken, COOKIE_OPTIONS)
 
     return res.status(201).json({
@@ -56,4 +60,68 @@ export async function register(req: Request, res: Response) {
       error: 'Registration failed',
     } satisfies ApiResponse)
   }
+}
+
+export async function login(req: Request, res: Response) {
+  try {
+    const result = loginSchema.safeParse(req.body)
+
+    if (!result.success) {
+      return res.status(400).json({
+        success: false,
+        error: 'Validation failed',
+        details: result.error.flatten().fieldErrors as Record<string, string[]>,
+      } satisfies ApiResponse)
+    }
+
+    const { email, password } = result.data
+
+    const user = await findUserByEmail(email)
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid email or password',
+      } satisfies ApiResponse)
+    }
+
+    const isValidPassword = await verifyPassword(password, user.passwordHash)
+    if (!isValidPassword) {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid email or password',
+      } satisfies ApiResponse)
+    }
+
+    const tokens = generateTokens(user.id)
+
+    res.cookie('accessToken', tokens.accessToken, COOKIE_OPTIONS)
+
+    const userResponse: Omit<User, 'passwordHash'> = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      avatarUrl: user.avatarUrl,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: { user: userResponse, tokens },
+    } satisfies ApiResponse<AuthResponse>)
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: 'Login failed',
+    } satisfies ApiResponse)
+  }
+}
+
+export async function logout(_req: Request, res: Response) {
+  res.clearCookie('accessToken', COOKIE_OPTIONS)
+
+  return res.status(200).json({
+    success: true,
+    message: 'Logged out successfully',
+  } satisfies ApiResponse)
 }
