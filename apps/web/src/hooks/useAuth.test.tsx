@@ -190,22 +190,14 @@ describe('useAuth', () => {
   })
 
   describe('logout', () => {
-    it('calls logout endpoint and redirects to login', async () => {
-      server.use(
-        http.post(`${API_BASE_URL}/api/auth/logout`, () => {
-          return HttpResponse.json({ success: true })
-        })
-      )
-
+    it('clears user data and redirects to login', () => {
       const { result } = renderHook(() => useAuth(), {
         wrapper: createWrapper(),
       })
 
-      await result.current.logout()
+      result.current.logout()
 
-      await waitFor(() => {
-        expect(mockNavigate).toHaveBeenCalledWith('/login')
-      })
+      expect(mockNavigate).toHaveBeenCalledWith('/login')
     })
   })
 

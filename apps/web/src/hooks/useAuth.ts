@@ -44,13 +44,8 @@ export function useAuth() {
     },
   })
 
-  const logout = async () => {
-    try {
-      // Call backend to clear HTTP-only cookies
-      await fetcher('/api/auth/logout', { method: 'POST' })
-    } catch {
-      // Continue with local cleanup even if backend call fails
-    }
+  const logout = () => {
+    // TODO: Call backend logout endpoint once implemented to clear HTTP-only cookies
     queryClient.setQueryData(AUTH_KEYS.user, null)
     queryClient.clear()
     navigate('/login')
