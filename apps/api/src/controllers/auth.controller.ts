@@ -9,11 +9,15 @@ import {
   verifyPassword,
 } from '../services/auth.service'
 
-const COOKIE_OPTIONS = {
+const COOKIE_BASE = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
   sameSite: 'lax' as const, // 'lax' allows cross-origin requests for multi-domain deployments
   path: '/',
+}
+
+const COOKIE_OPTIONS = {
+  ...COOKIE_BASE,
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
 }
 
@@ -121,12 +125,7 @@ export async function login(req: Request, res: Response) {
 }
 
 export async function logout(_req: Request, res: Response) {
-  res.clearCookie('accessToken', {
-    httpOnly: COOKIE_OPTIONS.httpOnly,
-    secure: COOKIE_OPTIONS.secure,
-    sameSite: COOKIE_OPTIONS.sameSite,
-    path: COOKIE_OPTIONS.path,
-  })
+  res.clearCookie('accessToken', COOKIE_BASE)
 
   return res.status(200).json({
     success: true,
