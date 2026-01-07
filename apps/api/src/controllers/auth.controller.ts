@@ -12,7 +12,8 @@ import {
 const COOKIE_OPTIONS = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax' as const,
+  sameSite: 'lax' as const, // 'lax' allows cross-origin requests for multi-domain deployments
+  path: '/',
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
 }
 
@@ -55,6 +56,7 @@ export async function register(req: Request, res: Response) {
       } satisfies ApiResponse)
     }
 
+    console.error('Registration error:', error)
     return res.status(500).json({
       success: false,
       error: 'Registration failed',
@@ -110,6 +112,7 @@ export async function login(req: Request, res: Response) {
       data: { user: userResponse, tokens },
     } satisfies ApiResponse<AuthResponse>)
   } catch (error) {
+    console.error('Login error:', error)
     return res.status(500).json({
       success: false,
       error: 'Login failed',
@@ -122,6 +125,7 @@ export async function logout(_req: Request, res: Response) {
     httpOnly: COOKIE_OPTIONS.httpOnly,
     secure: COOKIE_OPTIONS.secure,
     sameSite: COOKIE_OPTIONS.sameSite,
+    path: COOKIE_OPTIONS.path,
   })
 
   return res.status(200).json({
