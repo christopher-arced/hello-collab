@@ -16,7 +16,6 @@ export function useAuth() {
     queryFn: () => fetcher<User>('/api/auth/me'),
     retry: false,
     staleTime: 1000 * 60 * 5, // 5 minutes
-    enabled: !!localStorage.getItem('accessToken'),
   })
 
   const registerMutation = useMutation({
@@ -26,10 +25,7 @@ export function useAuth() {
         body: JSON.stringify(credentials),
       }),
     onSuccess: (data) => {
-      localStorage.setItem('accessToken', data.tokens.accessToken)
-      if (data.tokens.refreshToken) {
-        localStorage.setItem('refreshToken', data.tokens.refreshToken)
-      }
+      // Tokens are now set as HTTP-only cookies by the backend
       queryClient.setQueryData(AUTH_KEYS.user, data.user)
       navigate('/')
     },
@@ -42,18 +38,19 @@ export function useAuth() {
         body: JSON.stringify(credentials),
       }),
     onSuccess: (data) => {
-      localStorage.setItem('accessToken', data.tokens.accessToken)
-      if (data.tokens.refreshToken) {
-        localStorage.setItem('refreshToken', data.tokens.refreshToken)
-      }
+      // Tokens are now set as HTTP-only cookies by the backend
       queryClient.setQueryData(AUTH_KEYS.user, data.user)
       navigate('/')
     },
   })
 
-  const logout = () => {
-    localStorage.removeItem('accessToken')
-    localStorage.removeItem('refreshToken')
+  const logout = async () => {
+    try {
+      // Call backend to clear HTTP-only cookies
+      await fetcher('/api/auth/logout', { method: 'POST' })
+    } catch {
+      // Continue with local cleanup even if backend call fails
+    }
     queryClient.setQueryData(AUTH_KEYS.user, null)
     queryClient.clear()
     navigate('/login')

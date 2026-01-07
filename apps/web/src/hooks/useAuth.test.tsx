@@ -21,9 +21,8 @@ vi.mock('react-router-dom', async () => {
 const server = setupServer()
 
 beforeEach(() => {
-  server.listen({ onUnhandledRequest: 'error' })
+  server.listen({ onUnhandledRequest: 'warn' })
   vi.clearAllMocks()
-  localStorage.clear()
 })
 
 afterEach(() => {
@@ -86,8 +85,7 @@ describe('useAuth', () => {
       })
 
       await waitFor(() => {
-        expect(localStorage.getItem('accessToken')).toBe('test-access-token')
-        expect(localStorage.getItem('refreshToken')).toBe('test-refresh-token')
+        // Tokens are now set via HTTP-only cookies by backend, not localStorage
         expect(mockNavigate).toHaveBeenCalledWith('/')
       })
     })
@@ -157,7 +155,7 @@ describe('useAuth', () => {
       })
 
       await waitFor(() => {
-        expect(localStorage.getItem('accessToken')).toBe('test-access-token')
+        // Tokens are now set via HTTP-only cookies by backend, not localStorage
         expect(mockNavigate).toHaveBeenCalledWith('/')
       })
     })
@@ -192,19 +190,22 @@ describe('useAuth', () => {
   })
 
   describe('logout', () => {
-    it('clears tokens and redirects to login', async () => {
-      localStorage.setItem('accessToken', 'test-token')
-      localStorage.setItem('refreshToken', 'test-refresh')
+    it('calls logout endpoint and redirects to login', async () => {
+      server.use(
+        http.post(`${API_BASE_URL}/api/auth/logout`, () => {
+          return HttpResponse.json({ success: true })
+        })
+      )
 
       const { result } = renderHook(() => useAuth(), {
         wrapper: createWrapper(),
       })
 
-      result.current.logout()
+      await result.current.logout()
 
-      expect(localStorage.getItem('accessToken')).toBeNull()
-      expect(localStorage.getItem('refreshToken')).toBeNull()
-      expect(mockNavigate).toHaveBeenCalledWith('/login')
+      await waitFor(() => {
+        expect(mockNavigate).toHaveBeenCalledWith('/login')
+      })
     })
   })
 

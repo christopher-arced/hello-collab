@@ -13,6 +13,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     const [isFocused, setIsFocused] = useState(false)
     const generatedId = useId()
     const inputId = id || generatedId
+    const errorId = `${inputId}-error`
 
     const hasError = error || !!errorMessage
 
@@ -37,12 +38,16 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div>
         {label && (
-          <label htmlFor={inputId} className="block text-[13px] font-medium text-[#9a9aae] mb-2">{label}</label>
+          <label htmlFor={inputId} className="block text-[13px] font-medium text-[#9a9aae] mb-2">
+            {label}
+          </label>
         )}
         <div className="relative">
           <input
             ref={ref}
             id={inputId}
+            aria-invalid={hasError}
+            aria-describedby={errorMessage ? errorId : undefined}
             {...props}
             className={getInputClassName()}
             onFocus={(e) => {
@@ -64,7 +69,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           )}
         </div>
         {errorMessage && (
-          <p className="mt-1.5 text-xs text-red-500">{errorMessage}</p>
+          <p id={errorId} role="alert" className="mt-1.5 text-xs text-red-500">
+            {errorMessage}
+          </p>
         )}
       </div>
     )

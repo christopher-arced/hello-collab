@@ -14,31 +14,22 @@ export class ApiError extends Error {
   }
 }
 
-export async function fetcher<T>(
-  endpoint: string,
-  options: RequestInit = {}
-): Promise<T> {
-  const token = localStorage.getItem('accessToken')
-
+export async function fetcher<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(options.headers as Record<string, string>),
   }
 
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
+    credentials: 'include', // Send/receive HTTP-only cookies
     headers,
   })
 
   const data: ApiResponse<T> = await response.json()
 
   if (!response.ok || !data.success) {
-    throw new ApiError(
-      data.error || 'Request failed',
-      response.status,
-      data.details
-    )
+    throw new ApiError(data.error || 'Request failed', response.status, data.details)
   }
 
   return data.data as T

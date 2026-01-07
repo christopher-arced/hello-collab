@@ -80,7 +80,7 @@ const RegisterForm = () => {
       </h2>
 
       {registerError && (
-        <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+        <div role="alert" className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
           <p className="text-sm text-red-400">{registerError.message}</p>
         </div>
       )}
@@ -118,6 +118,7 @@ const RegisterForm = () => {
             rightElement={
               <button
                 type="button"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
                 onClick={() => setShowPassword(!showPassword)}
                 className="bg-transparent border-none text-[#6b6b7e] cursor-pointer p-1 text-sm"
               >
@@ -164,6 +165,7 @@ const RegisterForm = () => {
           <Checkbox
             checked={agreedToTerms}
             onChange={setAgreedToTerms}
+            aria-label="Agree to Terms of Service and Privacy Policy"
             label={
               <>
                 I agree to the{' '}
