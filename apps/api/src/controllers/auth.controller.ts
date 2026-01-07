@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express'
 import { Prisma } from '@prisma/client'
 import { registerSchema, loginSchema } from '@hello/validation'
-import type { ApiResponse, AuthResponse, User } from '@hello/types'
+import type { ApiResponse, User } from '@hello/types'
 import {
   createUser,
   generateTokens,
@@ -44,14 +44,14 @@ export async function register(req: Request, res: Response) {
     }
 
     const user = await createUser({ email, password, name })
-    const tokens = generateTokens(user.id)
+    const { accessToken } = generateTokens(user.id)
 
-    res.cookie('accessToken', tokens.accessToken, COOKIE_OPTIONS)
+    res.cookie('accessToken', accessToken, COOKIE_OPTIONS)
 
     return res.status(201).json({
       success: true,
-      data: { user, tokens },
-    } satisfies ApiResponse<AuthResponse>)
+      data: { user },
+    } satisfies ApiResponse<{ user: Omit<User, 'passwordHash'> }>)
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
       return res.status(409).json({
@@ -83,24 +83,21 @@ export async function login(req: Request, res: Response) {
     const { email, password } = result.data
 
     const user = await findUserByEmail(email)
-    if (!user) {
+
+    // Always run password verification to prevent timing attacks
+    const DUMMY_HASH = '$2b$10$dummyhashtopreventtimingattacks000000000000000'
+    const isValidPassword = await verifyPassword(password, user?.passwordHash ?? DUMMY_HASH)
+
+    if (!user || !isValidPassword) {
       return res.status(401).json({
         success: false,
         error: 'Invalid email or password',
       } satisfies ApiResponse)
     }
 
-    const isValidPassword = await verifyPassword(password, user.passwordHash)
-    if (!isValidPassword) {
-      return res.status(401).json({
-        success: false,
-        error: 'Invalid email or password',
-      } satisfies ApiResponse)
-    }
+    const { accessToken } = generateTokens(user.id)
 
-    const tokens = generateTokens(user.id)
-
-    res.cookie('accessToken', tokens.accessToken, COOKIE_OPTIONS)
+    res.cookie('accessToken', accessToken, COOKIE_OPTIONS)
 
     const userResponse: Omit<User, 'passwordHash'> = {
       id: user.id,
@@ -113,8 +110,8 @@ export async function login(req: Request, res: Response) {
 
     return res.status(200).json({
       success: true,
-      data: { user: userResponse, tokens },
-    } satisfies ApiResponse<AuthResponse>)
+      data: { user: userResponse },
+    } satisfies ApiResponse<{ user: Omit<User, 'passwordHash'> }>)
   } catch (error) {
     console.error('Login error:', error)
     return res.status(500).json({

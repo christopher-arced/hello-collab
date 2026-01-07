@@ -35,11 +35,10 @@ describe('POST /api/auth/register', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       }
-      const mockTokens = { accessToken: 'mock.jwt.token' }
 
       vi.mocked(authService.findUserByEmail).mockResolvedValue(null)
       vi.mocked(authService.createUser).mockResolvedValue(mockUser)
-      vi.mocked(authService.generateTokens).mockReturnValue(mockTokens)
+      vi.mocked(authService.generateTokens).mockReturnValue({ accessToken: 'mock.jwt.token' })
 
       const response = await request(app).post('/api/auth/register').send({
         email: 'test@example.com',
@@ -56,9 +55,33 @@ describe('POST /api/auth/register', () => {
             email: 'test@example.com',
             name: 'Test User',
           }),
-          tokens: mockTokens,
         },
       })
+      expect(response.body.data).not.toHaveProperty('tokens')
+    })
+
+    it('should set accessToken cookie on successful registration', async () => {
+      const mockUser = {
+        id: 'user-123',
+        email: 'test@example.com',
+        name: 'Test User',
+        avatarUrl: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }
+
+      vi.mocked(authService.findUserByEmail).mockResolvedValue(null)
+      vi.mocked(authService.createUser).mockResolvedValue(mockUser)
+      vi.mocked(authService.generateTokens).mockReturnValue({ accessToken: 'mock.jwt.token' })
+
+      const response = await request(app).post('/api/auth/register').send({
+        email: 'test@example.com',
+        password: 'Password123!',
+        name: 'Test User',
+      })
+
+      expect(response.headers['set-cookie']).toBeDefined()
+      expect(response.headers['set-cookie'][0]).toContain('accessToken=')
     })
   })
 
@@ -202,7 +225,7 @@ describe('POST /api/auth/login', () => {
   })
 
   describe('with valid credentials', () => {
-    it('should login and return 200 with user and tokens', async () => {
+    it('should login and return 200 with user (no tokens in body)', async () => {
       const mockUser = {
         id: 'user-123',
         email: 'test@example.com',
@@ -212,11 +235,10 @@ describe('POST /api/auth/login', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       }
-      const mockTokens = { accessToken: 'mock.jwt.token' }
 
       vi.mocked(authService.findUserByEmail).mockResolvedValue(mockUser)
       vi.mocked(authService.verifyPassword).mockResolvedValue(true)
-      vi.mocked(authService.generateTokens).mockReturnValue(mockTokens)
+      vi.mocked(authService.generateTokens).mockReturnValue({ accessToken: 'mock.jwt.token' })
 
       const response = await request(app).post('/api/auth/login').send({
         email: 'test@example.com',
@@ -232,10 +254,10 @@ describe('POST /api/auth/login', () => {
             email: 'test@example.com',
             name: 'Test User',
           }),
-          tokens: mockTokens,
         },
       })
       expect(response.body.data.user).not.toHaveProperty('passwordHash')
+      expect(response.body.data).not.toHaveProperty('tokens')
     })
 
     it('should set accessToken cookie on successful login', async () => {
@@ -266,6 +288,7 @@ describe('POST /api/auth/login', () => {
   describe('with invalid credentials', () => {
     it('should return 401 when email does not exist', async () => {
       vi.mocked(authService.findUserByEmail).mockResolvedValue(null)
+      vi.mocked(authService.verifyPassword).mockResolvedValue(false)
 
       const response = await request(app).post('/api/auth/login').send({
         email: 'nonexistent@example.com',
@@ -277,6 +300,8 @@ describe('POST /api/auth/login', () => {
         success: false,
         error: 'Invalid email or password',
       })
+      // Verify password check is still called to prevent timing attacks
+      expect(authService.verifyPassword).toHaveBeenCalled()
     })
 
     it('should return 401 when password is incorrect', async () => {
