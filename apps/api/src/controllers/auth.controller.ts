@@ -4,6 +4,13 @@ import { registerSchema } from '@hello/validation'
 import type { ApiResponse, AuthResponse } from '@hello/types'
 import { createUser, generateTokens, findUserByEmail } from '../services/auth.service'
 
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'strict' as const,
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+}
+
 export async function register(req: Request, res: Response) {
   try {
     const result = registerSchema.safeParse(req.body)
@@ -28,6 +35,9 @@ export async function register(req: Request, res: Response) {
 
     const user = await createUser({ email, password, name })
     const tokens = generateTokens(user.id)
+
+    // Set HTTP-only cookie for secure token storage
+    res.cookie('accessToken', tokens.accessToken, COOKIE_OPTIONS)
 
     return res.status(201).json({
       success: true,
