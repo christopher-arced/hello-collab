@@ -32,7 +32,9 @@ const Checkbox = ({ checked, onChange, label, 'aria-label': ariaLabel }: Checkbo
           </span>
         )}
       </div>
-      {label && <span className="text-[13px] text-[#8b8b9e] leading-relaxed">{label}</span>}
+      {label && (
+        <span className="text-[13px] text-theme-dark-text-secondary leading-relaxed">{label}</span>
+      )}
     </label>
   )
 }

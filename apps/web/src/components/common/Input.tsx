@@ -19,7 +19,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
     const getInputClassName = () => {
       const baseClasses =
-        'w-full py-3.5 rounded-[10px] text-white text-[15px] transition-all duration-200 placeholder:text-[#5a5a6e] focus:outline-none'
+        'w-full py-3.5 rounded-[10px] text-white text-[15px] transition-all duration-200 placeholder:text-theme-dark-text-muted focus:outline-none'
 
       const paddingClasses = leftElement ? 'pl-11' : 'pl-4'
       const rightPaddingClasses = rightElement ? 'pr-11' : 'pr-4'
@@ -38,7 +38,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div>
         {label && (
-          <label htmlFor={inputId} className="block text-[13px] font-medium text-[#9a9aae] mb-2">
+          <label
+            htmlFor={inputId}
+            className="block text-[13px] font-medium text-theme-text-muted mb-2"
+          >
             {label}
           </label>
         )}

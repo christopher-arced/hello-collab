@@ -1,9 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       fontFamily: {
@@ -23,9 +20,57 @@ export default {
           800: '#1e40af',
           900: '#1e3a8a',
         },
+        // Light theme (default)
+        theme: {
+          bg: '#fafafa',
+          'bg-secondary': '#ffffff',
+          'bg-tertiary': '#f5f5f5',
+          'bg-card': '#ffffff',
+          'bg-hover': '#f0f0f5',
+          text: '#0a0a0f',
+          'text-secondary': '#6b6b7e',
+          'text-muted': '#9a9aae',
+          accent: '#6366f1',
+          'accent-hover': '#4f46e5',
+          success: '#16a34a',
+          warning: '#d97706',
+          danger: '#dc2626',
+          border: '#e5e5ea',
+          'border-hover': '#d5d5da',
+        },
+        // Dark theme
+        'theme-dark': {
+          'bg-base': '#08080c',
+          bg: '#0a0a0f',
+          'bg-deep': '#0a0a12',
+          'bg-panel': '#0c0c14',
+          'bg-elevated': '#0f0f18',
+          'bg-surface': '#12121c',
+          'bg-secondary': '#12121a',
+          'bg-tertiary': '#1a1a24',
+          'bg-card': '#16161f',
+          'bg-hover': '#1e1e2a',
+          text: '#ffffff',
+          'text-secondary': '#8b8b9e',
+          'text-muted': '#5a5a6e',
+          accent: '#6366f1',
+          'accent-hover': '#818cf8',
+          success: '#22c55e',
+          warning: '#f59e0b',
+          danger: '#ef4444',
+          border: '#2a2a3a',
+          'border-hover': '#3a3a4a',
+        },
+      },
+      boxShadow: {
+        'accent-glow': '0 4px 12px rgba(99, 102, 241, 0.15)',
+        'accent-glow-dark': '0 4px 12px rgba(99, 102, 241, 0.3)',
+      },
+      backgroundImage: {
+        'theme-gradient': 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%)',
       },
       animation: {
-        'float': 'float 6s ease-in-out infinite',
+        float: 'float 6s ease-in-out infinite',
         'pulse-glow': 'pulse-glow 8s ease-in-out infinite',
         'gradient-shift': 'gradient-shift 4s ease infinite',
         'slide-up': 'slide-up 0.6s ease-out forwards',
@@ -36,7 +81,7 @@ export default {
         'slide-up-delay-5': 'slide-up 0.6s ease-out 0.5s forwards',
       },
       keyframes: {
-        'float': {
+        float: {
           '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
           '50%': { transform: 'translateY(-20px) rotate(5deg)' },
         },

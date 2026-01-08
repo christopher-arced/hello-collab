@@ -1,10 +1,12 @@
+import { Button } from '@/components/common'
 import RegisterForm from '../components/features/auth/RegisterForm'
+import { Link } from 'react-router-dom'
 
 const RegisterPage = () => {
   return (
-    <div className="min-h-screen flex bg-[#08080c] font-sans relative overflow-hidden">
+    <div className="min-h-screen flex bg-theme-dark-bg-base font-sans relative overflow-hidden">
       {/* Left Panel - Branding & Graphics */}
-      <div className="flex-1 bg-gradient-to-br from-[#0f0f18] via-[#12121c] to-[#0a0a12] flex flex-col justify-center items-center p-[60px] relative">
+      <div className="flex-1 bg-gradient-to-br from-theme-dark-bg-elevated via-theme-dark-bg-surface to-theme-dark-bg-deep flex flex-col justify-center items-center p-[60px] relative">
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {/* Gradient Orbs */}
@@ -87,9 +89,9 @@ const RegisterPage = () => {
             </span>
           </h1>
 
-          <p className="text-[17px] text-[#8b8b9e] leading-relaxed mb-10">
-            Join thousands of teams managing projects with real-time collaboration, intuitive boards,
-            and seamless workflows.
+          <p className="text-[17px] text-theme-dark-text-secondary leading-relaxed mb-10">
+            Join thousands of teams managing projects with real-time collaboration, intuitive
+            boards, and seamless workflows.
           </p>
 
           {/* Social Proof */}
@@ -99,7 +101,7 @@ const RegisterPage = () => {
                 (color, i) => (
                   <div
                     key={i}
-                    className={`w-9 h-9 rounded-full ${color} border-[3px] border-[#0f0f18] flex items-center justify-center text-xs font-semibold text-white ${i > 0 ? '-ml-2.5' : ''}`}
+                    className={`w-9 h-9 rounded-full ${color} border-[3px] border-theme-dark-bg-elevated flex items-center justify-center text-xs font-semibold text-white ${i > 0 ? '-ml-2.5' : ''}`}
                   >
                     {['SC', 'AR', 'JP', 'MK', 'TL'][i]}
                   </div>
@@ -108,14 +110,20 @@ const RegisterPage = () => {
             </div>
             <div className="text-left">
               <p className="text-sm font-semibold text-white m-0">10,000+ teams</p>
-              <p className="text-[13px] text-[#6b6b7e] m-0">already collaborating</p>
+              <p className="text-[13px] text-theme-text-secondary m-0">already collaborating</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Right Panel - Register Form */}
-      <div className="w-[520px] bg-[#0c0c14] border-l border-white/[0.06] flex flex-col justify-center px-14 py-12 relative">
+      <div className="w-[520px] bg-theme-dark-bg-panel border-l border-white/[0.06] flex flex-col justify-center px-14 py-12 relative">
+        <div className="absolute top-8 right-14 flex items-center gap-2">
+          <span className="text-sm text-theme-text-secondary">Already have an account?</span>
+          <Link to="/login">
+            <Button variant="outline">Sign in</Button>
+          </Link>
+        </div>
         <div className="max-w-[400px] mx-auto w-full">
           <RegisterForm />
         </div>
