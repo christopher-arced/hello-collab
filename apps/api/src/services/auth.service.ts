@@ -51,3 +51,30 @@ export async function createUser(data: RegisterInput): Promise<Omit<User, 'passw
 export async function findUserByEmail(email: string): Promise<PrismaUser | null> {
   return prisma.user.findUnique({ where: { email } })
 }
+
+export async function findUserById(id: string): Promise<Omit<User, 'passwordHash'> | null> {
+  return prisma.user.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      avatarUrl: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  })
+}
+
+export function verifyToken(token: string): { userId: string } | null {
+  const secret = process.env.JWT_SECRET
+  if (!secret) {
+    throw new Error('JWT_SECRET environment variable is not set')
+  }
+  try {
+    const payload = jwt.verify(token, secret) as { userId: string }
+    return payload
+  } catch {
+    return null
+  }
+}

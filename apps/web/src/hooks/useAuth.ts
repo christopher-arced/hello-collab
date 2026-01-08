@@ -13,7 +13,16 @@ export function useAuth() {
 
   const { data: user, isLoading: isLoadingUser } = useQuery({
     queryKey: AUTH_KEYS.user,
-    queryFn: () => fetcher<User>('/api/auth/me'),
+    queryFn: async () => {
+      try {
+        return await fetcher<User>('/api/auth/me')
+      } catch (error) {
+        if (error instanceof ApiError && error.status === 401) {
+          return null
+        }
+        throw error
+      }
+    },
     retry: false,
     staleTime: 1000 * 60 * 5, // 5 minutes
   })
