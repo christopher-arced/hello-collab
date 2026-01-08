@@ -1,6 +1,9 @@
 import { Button } from '@/components/common'
+import AvatarStack from '../components/features/auth/AvatarStack'
 import FloatingCard from '../components/features/auth/FloatingCard'
 import GradientOrb from '../components/features/auth/GradientOrb'
+import GridPattern from '../components/features/auth/GridPattern'
+import Logo from '../components/features/auth/Logo'
 import RegisterForm from '../components/features/auth/RegisterForm'
 import { Link } from 'react-router-dom'
 
@@ -52,17 +55,14 @@ const RegisterPage = () => {
           />
 
           {/* Grid Pattern */}
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_70%)]" />
+          <GridPattern size={60} opacity={0.02} maskRadius={20} />
         </div>
 
         {/* Content */}
         <div className="relative z-10 text-center max-w-[500px]">
           {/* Logo */}
-          <div className="flex items-center justify-center gap-3.5 mb-12">
-            <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 via-violet-500 to-fuchsia-500 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/40 animate-gradient-shift bg-[length:200%_200%]">
-              <span className="text-[28px] font-bold text-white font-mono">H</span>
-            </div>
-            <span className="text-[28px] font-semibold text-white tracking-tight">HelloCollab</span>
+          <div className="flex justify-center mb-12">
+            <Logo size="lg" />
           </div>
 
           <h1 className="text-[44px] font-bold text-white leading-tight mb-5 tracking-tight">
@@ -80,18 +80,17 @@ const RegisterPage = () => {
 
           {/* Social Proof */}
           <div className="flex items-center justify-center gap-4">
-            <div className="flex">
-              {['bg-indigo-500', 'bg-green-500', 'bg-amber-500', 'bg-pink-500', 'bg-blue-500'].map(
-                (color, i) => (
-                  <div
-                    key={i}
-                    className={`w-9 h-9 rounded-full ${color} border-[3px] border-theme-dark-bg-elevated flex items-center justify-center text-xs font-semibold text-white ${i > 0 ? '-ml-2.5' : ''}`}
-                  >
-                    {['SC', 'AR', 'JP', 'MK', 'TL'][i]}
-                  </div>
-                )
-              )}
-            </div>
+            <AvatarStack
+              size="md"
+              borderColor="border-theme-dark-bg-elevated"
+              avatars={[
+                { color: 'bg-indigo-500', initials: 'SC' },
+                { color: 'bg-green-500', initials: 'AR' },
+                { color: 'bg-amber-500', initials: 'JP' },
+                { color: 'bg-pink-500', initials: 'MK' },
+                { color: 'bg-blue-500', initials: 'TL' },
+              ]}
+            />
             <div className="text-left">
               <p className="text-sm font-semibold text-white m-0">10,000+ teams</p>
               <p className="text-[13px] text-theme-text-secondary m-0">already collaborating</p>

@@ -187,7 +187,8 @@ const RegisterForm = () => {
           variant="gradient"
           type="submit"
           fullWidth
-          disabled={!agreedToTerms || isRegistering}
+          disabled={!agreedToTerms}
+          loading={isRegistering}
         >
           {isRegistering ? 'Creating account...' : 'Create account →'}
         </Button>
