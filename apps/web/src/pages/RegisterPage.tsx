@@ -1,4 +1,6 @@
 import { Button } from '@/components/common'
+import FloatingCard from '../components/features/auth/FloatingCard'
+import GradientOrb from '../components/features/auth/GradientOrb'
 import RegisterForm from '../components/features/auth/RegisterForm'
 import { Link } from 'react-router-dom'
 
@@ -10,62 +12,44 @@ const RegisterPage = () => {
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {/* Gradient Orbs */}
-          <div className="absolute top-[10%] left-[20%] w-[400px] h-[400px] rounded-full blur-[60px] animate-pulse-glow bg-indigo-500/15" />
-          <div className="absolute bottom-[20%] right-[10%] w-[300px] h-[300px] rounded-full blur-[50px] animate-pulse-glow bg-fuchsia-500/10 [animation-delay:2s]" />
-          <div className="absolute top-[60%] left-[10%] w-[250px] h-[250px] rounded-full blur-[40px] animate-pulse-glow bg-green-500/10 [animation-delay:4s]" />
+          <GradientOrb
+            position="top-[10%] left-[20%]"
+            size="w-[400px] h-[400px]"
+            blur="blur-[60px]"
+            color="bg-indigo-500/15"
+          />
+          <GradientOrb
+            position="bottom-[20%] right-[10%]"
+            size="w-[300px] h-[300px]"
+            blur="blur-[50px]"
+            color="bg-fuchsia-500/10"
+            delay="[animation-delay:2s]"
+          />
+          <GradientOrb
+            position="top-[60%] left-[10%]"
+            size="w-[250px] h-[250px]"
+            blur="blur-[40px]"
+            color="bg-green-500/10"
+            delay="[animation-delay:4s]"
+          />
 
           {/* Floating Cards */}
-          <div className="absolute top-[15%] left-[15%] w-[180px] h-[100px] bg-gradient-to-br from-white/[0.03] to-white/[0.01] rounded-xl border border-white/5 backdrop-blur-lg animate-float -rotate-12">
-            <div className="p-3 border-b border-white/5">
-              <div className="w-20 h-2 bg-white/10 rounded" />
-            </div>
-            <div className="p-3 flex gap-1.5">
-              <div className="w-5 h-5 rounded-full bg-indigo-500/30" />
-              <div>
-                <div className="w-[60px] h-1.5 bg-white/[0.08] rounded mb-1" />
-                <div className="w-10 h-1.5 bg-white/5 rounded" />
-              </div>
-            </div>
-          </div>
-
-          <div className="absolute top-[25%] right-[20%] w-[180px] h-[100px] bg-gradient-to-br from-white/[0.03] to-white/[0.01] rounded-xl border border-white/5 backdrop-blur-lg animate-float rotate-[8deg] [animation-delay:2s]">
-            <div className="p-3 border-b border-white/5">
-              <div className="w-20 h-2 bg-white/10 rounded" />
-            </div>
-            <div className="p-3 flex gap-1.5">
-              <div className="w-5 h-5 rounded-full bg-indigo-500/30" />
-              <div>
-                <div className="w-[60px] h-1.5 bg-white/[0.08] rounded mb-1" />
-                <div className="w-10 h-1.5 bg-white/5 rounded" />
-              </div>
-            </div>
-          </div>
-
-          <div className="absolute bottom-[30%] left-[25%] w-[180px] h-[100px] bg-gradient-to-br from-white/[0.03] to-white/[0.01] rounded-xl border border-white/5 backdrop-blur-lg animate-float -rotate-[5deg] [animation-delay:4s]">
-            <div className="p-3 border-b border-white/5">
-              <div className="w-20 h-2 bg-white/10 rounded" />
-            </div>
-            <div className="p-3 flex gap-1.5">
-              <div className="w-5 h-5 rounded-full bg-indigo-500/30" />
-              <div>
-                <div className="w-[60px] h-1.5 bg-white/[0.08] rounded mb-1" />
-                <div className="w-10 h-1.5 bg-white/5 rounded" />
-              </div>
-            </div>
-          </div>
-
-          <div className="absolute bottom-[15%] right-[15%] w-[180px] h-[100px] bg-gradient-to-br from-white/[0.03] to-white/[0.01] rounded-xl border border-white/5 backdrop-blur-lg animate-float rotate-[15deg] [animation-delay:1s]">
-            <div className="p-3 border-b border-white/5">
-              <div className="w-20 h-2 bg-white/10 rounded" />
-            </div>
-            <div className="p-3 flex gap-1.5">
-              <div className="w-5 h-5 rounded-full bg-indigo-500/30" />
-              <div>
-                <div className="w-[60px] h-1.5 bg-white/[0.08] rounded mb-1" />
-                <div className="w-10 h-1.5 bg-white/5 rounded" />
-              </div>
-            </div>
-          </div>
+          <FloatingCard position="top-[15%] left-[15%]" rotation="-rotate-12" />
+          <FloatingCard
+            position="top-[25%] right-[20%]"
+            rotation="rotate-[8deg]"
+            delay="[animation-delay:2s]"
+          />
+          <FloatingCard
+            position="bottom-[30%] left-[25%]"
+            rotation="-rotate-[5deg]"
+            delay="[animation-delay:4s]"
+          />
+          <FloatingCard
+            position="bottom-[15%] right-[15%]"
+            rotation="rotate-[15deg]"
+            delay="[animation-delay:1s]"
+          />
 
           {/* Grid Pattern */}
           <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_70%)]" />
