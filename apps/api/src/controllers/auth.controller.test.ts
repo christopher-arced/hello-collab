@@ -402,3 +402,109 @@ describe('POST /api/auth/logout', () => {
     expect(response.headers['set-cookie'][0]).toContain('accessToken=;')
   })
 })
+
+describe('GET /api/auth/me', () => {
+  const app = createApp()
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    process.env.JWT_SECRET = 'test-secret'
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  describe('with valid session', () => {
+    it('should return 200 with user data when authenticated', async () => {
+      const mockUser = {
+        id: 'user-123',
+        email: 'test@example.com',
+        name: 'Test User',
+        avatarUrl: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }
+
+      vi.mocked(authService.verifyToken).mockReturnValue({ userId: 'user-123' })
+      vi.mocked(authService.findUserById).mockResolvedValue(mockUser)
+
+      const response = await request(app)
+        .get('/api/auth/me')
+        .set('Cookie', 'accessToken=valid.jwt.token')
+
+      expect(response.status).toBe(200)
+      expect(response.body).toEqual({
+        success: true,
+        data: expect.objectContaining({
+          id: 'user-123',
+          email: 'test@example.com',
+          name: 'Test User',
+        }),
+      })
+    })
+  })
+
+  describe('without authentication', () => {
+    it('should return 401 when no token is provided', async () => {
+      const response = await request(app).get('/api/auth/me')
+
+      expect(response.status).toBe(401)
+      expect(response.body).toEqual({
+        success: false,
+        error: 'Not authenticated',
+      })
+    })
+  })
+
+  describe('with invalid token', () => {
+    it('should return 401 and clear cookie when token is invalid', async () => {
+      vi.mocked(authService.verifyToken).mockReturnValue(null)
+
+      const response = await request(app)
+        .get('/api/auth/me')
+        .set('Cookie', 'accessToken=invalid.token')
+
+      expect(response.status).toBe(401)
+      expect(response.body).toEqual({
+        success: false,
+        error: 'Invalid or expired token',
+      })
+      expect(response.headers['set-cookie']).toBeDefined()
+      expect(response.headers['set-cookie'][0]).toContain('accessToken=;')
+    })
+
+    it('should return 401 and clear cookie when token is expired', async () => {
+      vi.mocked(authService.verifyToken).mockReturnValue(null)
+
+      const response = await request(app)
+        .get('/api/auth/me')
+        .set('Cookie', 'accessToken=expired.token')
+
+      expect(response.status).toBe(401)
+      expect(response.body).toEqual({
+        success: false,
+        error: 'Invalid or expired token',
+      })
+    })
+  })
+
+  describe('with valid token but user not found', () => {
+    it('should return 401 and clear cookie when user does not exist', async () => {
+      vi.mocked(authService.verifyToken).mockReturnValue({ userId: 'deleted-user' })
+      vi.mocked(authService.findUserById).mockResolvedValue(null)
+
+      const response = await request(app)
+        .get('/api/auth/me')
+        .set('Cookie', 'accessToken=valid.token.deleted.user')
+
+      expect(response.status).toBe(401)
+      expect(response.body).toEqual({
+        success: false,
+        error: 'User not found',
+      })
+      expect(response.headers['set-cookie']).toBeDefined()
+      expect(response.headers['set-cookie'][0]).toContain('accessToken=;')
+    })
+  })
+})
