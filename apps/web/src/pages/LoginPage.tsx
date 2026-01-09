@@ -32,7 +32,9 @@ const LoginPage = () => {
 
         {/* Footer */}
         <div className="absolute bottom-8 left-14 right-14 flex justify-between items-center">
-          <span className="text-xs text-theme-dark-text-muted">© 2026 HelloCollab</span>
+          <span className="text-xs text-theme-dark-text-muted">
+            © {new Date().getFullYear()} HelloCollab
+          </span>
           <div className="flex gap-5">
             <a
               href="#"

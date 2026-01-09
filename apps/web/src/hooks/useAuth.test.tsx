@@ -190,14 +190,43 @@ describe('useAuth', () => {
   })
 
   describe('logout', () => {
-    it('clears user data and redirects to login', () => {
+    it('calls logout API and redirects to login', async () => {
+      server.use(
+        http.post(`${API_BASE_URL}/api/auth/logout`, () => {
+          return HttpResponse.json({
+            success: true,
+            message: 'Logged out successfully',
+          })
+        })
+      )
+
       const { result } = renderHook(() => useAuth(), {
         wrapper: createWrapper(),
       })
 
       result.current.logout()
 
-      expect(mockNavigate).toHaveBeenCalledWith('/login')
+      await waitFor(() => {
+        expect(mockNavigate).toHaveBeenCalledWith('/login')
+      })
+    })
+
+    it('redirects to login even if logout API fails', async () => {
+      server.use(
+        http.post(`${API_BASE_URL}/api/auth/logout`, () => {
+          return HttpResponse.json({ success: false, error: 'Server error' }, { status: 500 })
+        })
+      )
+
+      const { result } = renderHook(() => useAuth(), {
+        wrapper: createWrapper(),
+      })
+
+      result.current.logout()
+
+      await waitFor(() => {
+        expect(mockNavigate).toHaveBeenCalledWith('/login')
+      })
     })
   })
 

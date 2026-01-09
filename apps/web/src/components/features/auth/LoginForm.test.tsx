@@ -133,36 +133,3 @@ describe('LoginForm', () => {
     expect(registerLink).toHaveAttribute('href', '/register')
   })
 })
-
-describe('LoginForm - Loading State', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
-  it('shows loading state when logging in', () => {
-    vi.doMock('../../../hooks/useAuth', () => ({
-      useAuth: () => ({
-        login: vi.fn(),
-        isLoggingIn: true,
-        loginError: null,
-      }),
-    }))
-
-    // Would require re-importing the component
-  })
-})
-
-describe('LoginForm - Error State', () => {
-  it('displays API error message', async () => {
-    // Reset the mock to show error state
-    vi.doMock('../../../hooks/useAuth', () => ({
-      useAuth: () => ({
-        login: vi.fn(),
-        isLoggingIn: false,
-        loginError: { message: 'Invalid email or password' },
-      }),
-    }))
-
-    // Would require re-importing the component
-  })
-})
