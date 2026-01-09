@@ -13,7 +13,16 @@ export function useAuth() {
 
   const { data: user, isLoading: isLoadingUser } = useQuery({
     queryKey: AUTH_KEYS.user,
-    queryFn: () => fetcher<User>('/api/auth/me'),
+    queryFn: async () => {
+      try {
+        return await fetcher<User>('/api/auth/me')
+      } catch (error) {
+        if (error instanceof ApiError && error.status === 401) {
+          return null
+        }
+        throw error
+      }
+    },
     retry: false,
     staleTime: 1000 * 60 * 5, // 5 minutes
   })
@@ -44,12 +53,23 @@ export function useAuth() {
     },
   })
 
-  const logout = () => {
-    // TODO: Call backend logout endpoint once implemented to clear HTTP-only cookies
-    queryClient.setQueryData(AUTH_KEYS.user, null)
-    queryClient.clear()
-    navigate('/login')
-  }
+  const logoutMutation = useMutation({
+    mutationFn: () =>
+      fetcher<void>('/api/auth/logout', {
+        method: 'POST',
+      }),
+    onSuccess: () => {
+      queryClient.setQueryData(AUTH_KEYS.user, null)
+      queryClient.clear()
+      navigate('/login')
+    },
+    onError: () => {
+      // Even if logout fails, clear local state and redirect
+      queryClient.setQueryData(AUTH_KEYS.user, null)
+      queryClient.clear()
+      navigate('/login')
+    },
+  })
 
   return {
     user,
@@ -66,6 +86,7 @@ export function useAuth() {
     isLoggingIn: loginMutation.isPending,
     loginError: loginMutation.error as ApiError | null,
 
-    logout,
+    logout: logoutMutation.mutate,
+    isLoggingOut: logoutMutation.isPending,
   }
 }

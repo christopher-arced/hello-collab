@@ -120,7 +120,7 @@ const RegisterForm = () => {
                 type="button"
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
                 onClick={() => setShowPassword(!showPassword)}
-                className="bg-transparent border-none text-[#6b6b7e] cursor-pointer p-1 text-sm"
+                className="bg-transparent border-none text-theme-text-secondary cursor-pointer p-1 text-sm"
               >
                 {showPassword ? '🙈' : '👁️'}
               </button>
@@ -135,7 +135,9 @@ const RegisterForm = () => {
                   <div
                     key={level}
                     className={`flex-1 h-[3px] rounded-sm transition-all duration-300 ${
-                      level <= passwordStrength.level ? passwordStrength.color : 'bg-[#2a2a3a]'
+                      level <= passwordStrength.level
+                        ? passwordStrength.color
+                        : 'bg-theme-dark-border'
                     }`}
                   />
                 ))}
@@ -181,7 +183,13 @@ const RegisterForm = () => {
           />
         </div>
 
-        <Button type="submit" fullWidth disabled={!agreedToTerms || isRegistering}>
+        <Button
+          variant="gradient"
+          type="submit"
+          fullWidth
+          disabled={!agreedToTerms}
+          loading={isRegistering}
+        >
           {isRegistering ? 'Creating account...' : 'Create account →'}
         </Button>
       </form>

@@ -123,9 +123,7 @@ describe('RegisterForm', () => {
     render(<RegisterForm />)
 
     const passwordInput = screen.getByLabelText(/^password$/i)
-    const toggleButton = screen.getAllByRole('button').find(
-      (btn) => btn.textContent === '👁️'
-    )
+    const toggleButton = screen.getAllByRole('button').find((btn) => btn.textContent === '👁️')
 
     expect(passwordInput).toHaveAttribute('type', 'password')
 
@@ -207,20 +205,5 @@ describe('RegisterForm', () => {
     await waitFor(() => {
       expect(screen.getByText('✓')).toBeInTheDocument()
     })
-  })
-})
-
-describe('RegisterForm - Error States', () => {
-  it('displays API error message', () => {
-    vi.doMock('../../../hooks/useAuth', () => ({
-      useAuth: () => ({
-        register: vi.fn(),
-        isRegistering: false,
-        registerError: { message: 'Email already registered' },
-      }),
-    }))
-
-    // This would require re-importing the component after the mock
-    // For simplicity, we can test this in integration tests
   })
 })

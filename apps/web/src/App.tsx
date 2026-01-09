@@ -1,6 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import RegisterPage from './pages/RegisterPage'
+import LoginPage from './pages/LoginPage'
+import { ProtectedRoute } from './components/routing/ProtectedRoute'
+import { GuestRoute } from './components/routing/GuestRoute'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -19,19 +22,36 @@ function App() {
           <Route
             path="/"
             element={
-              <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-                <div className="text-center">
-                  <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    Welcome to HelloCollab
-                  </h1>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    Real-time collaborative task management
-                  </p>
+              <ProtectedRoute>
+                <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+                  <div className="text-center">
+                    <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                      Welcome to HelloCollab
+                    </h1>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      Real-time collaborative task management
+                    </p>
+                  </div>
                 </div>
-              </div>
+              </ProtectedRoute>
             }
           />
-          <Route path="/register" element={<RegisterPage />} />
+          <Route
+            path="/register"
+            element={
+              <GuestRoute>
+                <RegisterPage />
+              </GuestRoute>
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              <GuestRoute>
+                <LoginPage />
+              </GuestRoute>
+            }
+          />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
-import { hashPassword, verifyPassword, generateTokens } from './auth.service'
+import { hashPassword, verifyPassword, generateTokens, verifyToken } from './auth.service'
 
 vi.mock('bcrypt')
 vi.mock('jsonwebtoken')
@@ -89,6 +89,52 @@ describe('auth.service', () => {
       delete process.env.JWT_SECRET
 
       expect(() => generateTokens('user-123')).toThrow('JWT_SECRET environment variable is not set')
+    })
+  })
+
+  describe('verifyToken', () => {
+    const originalEnv = process.env
+
+    beforeEach(() => {
+      process.env = { ...originalEnv }
+      process.env.JWT_SECRET = 'test-secret'
+    })
+
+    it('should return userId payload for valid token', () => {
+      const mockPayload = { userId: 'user-123' }
+
+      vi.mocked(jwt.verify).mockReturnValue(mockPayload as never)
+
+      const result = verifyToken('valid.jwt.token')
+
+      expect(jwt.verify).toHaveBeenCalledWith('valid.jwt.token', 'test-secret')
+      expect(result).toEqual({ userId: 'user-123' })
+    })
+
+    it('should return null for invalid token', () => {
+      vi.mocked(jwt.verify).mockImplementation(() => {
+        throw new Error('invalid token')
+      })
+
+      const result = verifyToken('invalid.token')
+
+      expect(result).toBeNull()
+    })
+
+    it('should return null for expired token', () => {
+      vi.mocked(jwt.verify).mockImplementation(() => {
+        throw new jwt.TokenExpiredError('jwt expired', new Date())
+      })
+
+      const result = verifyToken('expired.token')
+
+      expect(result).toBeNull()
+    })
+
+    it('should throw error if JWT_SECRET is not set', () => {
+      delete process.env.JWT_SECRET
+
+      expect(() => verifyToken('some.token')).toThrow('JWT_SECRET environment variable is not set')
     })
   })
 })
