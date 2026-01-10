@@ -6,9 +6,7 @@ import {
   createUser,
   generateTokens,
   findUserByEmail,
-  findUserById,
   verifyPassword,
-  verifyToken,
 } from '../services/auth.service'
 
 const COOKIE_BASE = {
@@ -132,46 +130,9 @@ export async function logout(_req: Request, res: Response) {
   } satisfies ApiResponse)
 }
 
-export async function me(req: Request, res: Response) {
-  try {
-    const token = req.cookies.accessToken
-
-    if (!token) {
-      return res.status(401).json({
-        success: false,
-        error: 'Not authenticated',
-      } satisfies ApiResponse)
-    }
-
-    const payload = verifyToken(token)
-
-    if (!payload) {
-      res.clearCookie('accessToken', COOKIE_BASE)
-      return res.status(401).json({
-        success: false,
-        error: 'Invalid or expired token',
-      } satisfies ApiResponse)
-    }
-
-    const user = await findUserById(payload.userId)
-
-    if (!user) {
-      res.clearCookie('accessToken', COOKIE_BASE)
-      return res.status(401).json({
-        success: false,
-        error: 'User not found',
-      } satisfies ApiResponse)
-    }
-
-    return res.status(200).json({
-      success: true,
-      data: user,
-    } satisfies ApiResponse<Omit<User, 'passwordHash'>>)
-  } catch (error) {
-    console.error('Get current user error:', error)
-    return res.status(500).json({
-      success: false,
-      error: 'Failed to get current user',
-    } satisfies ApiResponse)
-  }
+export function getCurrentUser(req: Request, res: Response) {
+  return res.status(200).json({
+    success: true,
+    data: req.user,
+  } satisfies ApiResponse<Omit<User, 'passwordHash'>>)
 }

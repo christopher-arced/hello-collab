@@ -100,7 +100,7 @@ describe('auth.service', () => {
       process.env.JWT_SECRET = 'test-secret'
     })
 
-    it('should return userId payload for valid token', () => {
+    it('should return valid result with userId for valid token', () => {
       const mockPayload = { userId: 'user-123' }
 
       vi.mocked(jwt.verify).mockReturnValue(mockPayload as never)
@@ -108,27 +108,27 @@ describe('auth.service', () => {
       const result = verifyToken('valid.jwt.token')
 
       expect(jwt.verify).toHaveBeenCalledWith('valid.jwt.token', 'test-secret')
-      expect(result).toEqual({ userId: 'user-123' })
+      expect(result).toEqual({ valid: true, userId: 'user-123' })
     })
 
-    it('should return null for invalid token', () => {
+    it('should return invalid result with expired false for invalid token', () => {
       vi.mocked(jwt.verify).mockImplementation(() => {
         throw new Error('invalid token')
       })
 
       const result = verifyToken('invalid.token')
 
-      expect(result).toBeNull()
+      expect(result).toEqual({ valid: false, expired: false })
     })
 
-    it('should return null for expired token', () => {
+    it('should return invalid result with expired true for expired token', () => {
       vi.mocked(jwt.verify).mockImplementation(() => {
         throw new jwt.TokenExpiredError('jwt expired', new Date())
       })
 
       const result = verifyToken('expired.token')
 
-      expect(result).toBeNull()
+      expect(result).toEqual({ valid: false, expired: true })
     })
 
     it('should throw error if JWT_SECRET is not set', () => {
