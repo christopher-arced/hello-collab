@@ -6,6 +6,7 @@ import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
 import { useAuth } from './useAuth'
 import { API_BASE_URL } from '../lib/api'
+import { useAuthStore } from '../stores'
 
 // Mock navigate
 const mockNavigate = vi.fn()
@@ -23,6 +24,7 @@ const server = setupServer()
 beforeEach(() => {
   server.listen({ onUnhandledRequest: 'warn' })
   vi.clearAllMocks()
+  useAuthStore.getState().reset()
 })
 
 afterEach(() => {

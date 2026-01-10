@@ -1,7 +1,9 @@
+import { useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import type { AuthResponse, User, RegisterCredentials, LoginCredentials } from '@hello/types'
 import { fetcher, ApiError } from '../lib/api'
+import { useAuthStore } from '../stores'
 
 const AUTH_KEYS = {
   user: ['auth', 'user'] as const,
@@ -10,8 +12,10 @@ const AUTH_KEYS = {
 export function useAuth() {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
+  const { setUser, setLoading, reset } = useAuthStore()
+  const { user, isAuthenticated, isLoading } = useAuthStore()
 
-  const { data: user, isLoading: isLoadingUser } = useQuery({
+  const { data: fetchedUser, isLoading: isLoadingUser } = useQuery({
     queryKey: AUTH_KEYS.user,
     queryFn: async () => {
       try {
@@ -27,6 +31,15 @@ export function useAuth() {
     staleTime: 1000 * 60 * 5, // 5 minutes
   })
 
+  // Sync React Query state with Zustand store
+  useEffect(() => {
+    if (!isLoadingUser) {
+      setUser(fetchedUser ?? null)
+    } else {
+      setLoading(true)
+    }
+  }, [fetchedUser, isLoadingUser, setUser, setLoading])
+
   const registerMutation = useMutation({
     mutationFn: (credentials: RegisterCredentials) =>
       fetcher<AuthResponse>('/api/auth/register', {
@@ -34,8 +47,8 @@ export function useAuth() {
         body: JSON.stringify(credentials),
       }),
     onSuccess: (data) => {
-      // Tokens are now set as HTTP-only cookies by the backend
       queryClient.setQueryData(AUTH_KEYS.user, data.user)
+      setUser(data.user)
       navigate('/')
     },
   })
@@ -47,8 +60,8 @@ export function useAuth() {
         body: JSON.stringify(credentials),
       }),
     onSuccess: (data) => {
-      // Tokens are now set as HTTP-only cookies by the backend
       queryClient.setQueryData(AUTH_KEYS.user, data.user)
+      setUser(data.user)
       navigate('/')
     },
   })
@@ -61,20 +74,21 @@ export function useAuth() {
     onSuccess: () => {
       queryClient.setQueryData(AUTH_KEYS.user, null)
       queryClient.clear()
+      reset()
       navigate('/login')
     },
     onError: () => {
-      // Even if logout fails, clear local state and redirect
       queryClient.setQueryData(AUTH_KEYS.user, null)
       queryClient.clear()
+      reset()
       navigate('/login')
     },
   })
 
   return {
     user,
-    isAuthenticated: !!user,
-    isLoading: isLoadingUser,
+    isAuthenticated,
+    isLoading,
 
     register: registerMutation.mutate,
     registerAsync: registerMutation.mutateAsync,
