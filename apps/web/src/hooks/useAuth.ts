@@ -33,10 +33,9 @@ export function useAuth() {
 
   // Sync React Query state with Zustand store
   useEffect(() => {
+    setLoading(isLoadingUser)
     if (!isLoadingUser) {
       setUser(fetchedUser ?? null)
-    } else {
-      setLoading(true)
     }
   }, [fetchedUser, isLoadingUser, setUser, setLoading])
 

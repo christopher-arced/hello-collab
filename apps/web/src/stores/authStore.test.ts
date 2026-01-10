@@ -32,7 +32,6 @@ describe('authStore', () => {
       const state = useAuthStore.getState()
       expect(state.user).toEqual(mockUser)
       expect(state.isAuthenticated).toBe(true)
-      expect(state.isLoading).toBe(false)
     })
 
     it('clears user and sets isAuthenticated to false when null', () => {
@@ -42,7 +41,18 @@ describe('authStore', () => {
       const state = useAuthStore.getState()
       expect(state.user).toBeNull()
       expect(state.isAuthenticated).toBe(false)
-      expect(state.isLoading).toBe(false)
+    })
+
+    it('does not modify isLoading state', () => {
+      useAuthStore.getState().setLoading(false)
+      useAuthStore.getState().setUser(mockUser)
+
+      expect(useAuthStore.getState().isLoading).toBe(false)
+
+      useAuthStore.getState().setLoading(true)
+      useAuthStore.getState().setUser(null)
+
+      expect(useAuthStore.getState().isLoading).toBe(true)
     })
   })
 

@@ -1,15 +1,12 @@
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthStore } from '@/stores'
-import { useNavigate } from 'react-router-dom'
 
 export default function DashboardPage() {
   const user = useAuthStore((state) => state.user)
   const { logout } = useAuth()
-  const navigate = useNavigate()
 
   const handleLogout = () => {
     logout()
-    navigate('/login')
   }
 
   return (
