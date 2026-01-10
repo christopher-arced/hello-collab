@@ -66,15 +66,18 @@ export async function findUserById(id: string): Promise<Omit<User, 'passwordHash
   })
 }
 
-export function verifyToken(token: string): { userId: string } | null {
+export type TokenVerifyResult = { valid: true; userId: string } | { valid: false; expired: boolean }
+
+export function verifyToken(token: string): TokenVerifyResult {
   const secret = process.env.JWT_SECRET
   if (!secret) {
     throw new Error('JWT_SECRET environment variable is not set')
   }
   try {
     const payload = jwt.verify(token, secret) as { userId: string }
-    return payload
-  } catch {
-    return null
+    return { valid: true, userId: payload.userId }
+  } catch (error) {
+    const expired = error instanceof jwt.TokenExpiredError
+    return { valid: false, expired }
   }
 }

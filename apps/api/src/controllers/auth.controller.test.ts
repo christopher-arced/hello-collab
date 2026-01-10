@@ -426,7 +426,7 @@ describe('GET /api/auth/me', () => {
         updatedAt: new Date(),
       }
 
-      vi.mocked(authService.verifyToken).mockReturnValue({ userId: 'user-123' })
+      vi.mocked(authService.verifyToken).mockReturnValue({ valid: true, userId: 'user-123' })
       vi.mocked(authService.findUserById).mockResolvedValue(mockUser)
 
       const response = await request(app)
@@ -459,7 +459,7 @@ describe('GET /api/auth/me', () => {
 
   describe('with invalid token', () => {
     it('should return 401 and clear cookie when token is invalid', async () => {
-      vi.mocked(authService.verifyToken).mockReturnValue(null)
+      vi.mocked(authService.verifyToken).mockReturnValue({ valid: false, expired: false })
 
       const response = await request(app)
         .get('/api/auth/me')
@@ -468,30 +468,32 @@ describe('GET /api/auth/me', () => {
       expect(response.status).toBe(401)
       expect(response.body).toEqual({
         success: false,
-        error: 'Invalid or expired token',
+        error: 'Invalid token',
       })
       expect(response.headers['set-cookie']).toBeDefined()
       expect(response.headers['set-cookie'][0]).toContain('accessToken=;')
     })
 
-    it('should return 401 and clear cookie when token is expired', async () => {
-      vi.mocked(authService.verifyToken).mockReturnValue(null)
+    it('should return 403 and clear cookie when token is expired', async () => {
+      vi.mocked(authService.verifyToken).mockReturnValue({ valid: false, expired: true })
 
       const response = await request(app)
         .get('/api/auth/me')
         .set('Cookie', 'accessToken=expired.token')
 
-      expect(response.status).toBe(401)
+      expect(response.status).toBe(403)
       expect(response.body).toEqual({
         success: false,
-        error: 'Invalid or expired token',
+        error: 'Token expired',
       })
+      expect(response.headers['set-cookie']).toBeDefined()
+      expect(response.headers['set-cookie'][0]).toContain('accessToken=;')
     })
   })
 
   describe('with valid token but user not found', () => {
     it('should return 401 and clear cookie when user does not exist', async () => {
-      vi.mocked(authService.verifyToken).mockReturnValue({ userId: 'deleted-user' })
+      vi.mocked(authService.verifyToken).mockReturnValue({ valid: true, userId: 'deleted-user' })
       vi.mocked(authService.findUserById).mockResolvedValue(null)
 
       const response = await request(app)

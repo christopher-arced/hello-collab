@@ -4,6 +4,7 @@ import RegisterPage from './pages/RegisterPage'
 import LoginPage from './pages/LoginPage'
 import { ProtectedRoute } from './components/routing/ProtectedRoute'
 import { GuestRoute } from './components/routing/GuestRoute'
+import DashboardPage from './pages/DashboardPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -23,16 +24,7 @@ function App() {
             path="/"
             element={
               <ProtectedRoute>
-                <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-                  <div className="text-center">
-                    <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                      Welcome to HelloCollab
-                    </h1>
-                    <p className="text-gray-600 dark:text-gray-400">
-                      Real-time collaborative task management
-                    </p>
-                  </div>
-                </div>
+                <DashboardPage />
               </ProtectedRoute>
             }
           />
