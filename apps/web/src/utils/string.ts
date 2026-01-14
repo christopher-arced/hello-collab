@@ -5,9 +5,10 @@
  * "Alice" → "AL"
  */
 export const getInitials = (name: string): string => {
-  const words = name.trim().split(/\s+/)
+  const trimmed = name.trim()
+  const words = trimmed.split(/\s+/)
   if (words.length >= 2) {
     return (words[0][0] + words[words.length - 1][0]).toUpperCase()
   }
-  return name.slice(0, 2).toUpperCase()
+  return trimmed.slice(0, 2).toUpperCase()
 }

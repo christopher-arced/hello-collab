@@ -1,0 +1,85 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen, fireEvent } from '../../test/test-utils'
+import Sidebar from './Sidebar'
+
+const mockLogout = vi.fn()
+const mockUseAuth = vi.fn()
+const mockUseAuthStore = vi.fn()
+
+vi.mock('../../hooks/useAuth', () => ({
+  useAuth: () => mockUseAuth(),
+}))
+
+vi.mock('../../stores', () => ({
+  useAuthStore: () => mockUseAuthStore(),
+}))
+
+const mockUser = {
+  id: '1',
+  email: 'test@example.com',
+  name: 'John Doe',
+  avatarUrl: null,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+}
+
+describe('Sidebar', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockUseAuth.mockReturnValue({ logout: mockLogout })
+    mockUseAuthStore.mockReturnValue({ user: mockUser })
+  })
+
+  it('renders logo', () => {
+    render(<Sidebar />)
+    expect(document.querySelector('svg')).toBeInTheDocument()
+  })
+
+  it('renders navigation links', () => {
+    render(<Sidebar />)
+    expect(screen.getByRole('link', { name: 'Home' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Boards' })).toBeInTheDocument()
+  })
+
+  it('renders action buttons', () => {
+    render(<Sidebar />)
+    expect(screen.getByRole('button', { name: 'Notifications' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Settings' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Toggle theme' })).toBeInTheDocument()
+  })
+
+  it('displays user initials from name', () => {
+    render(<Sidebar />)
+    expect(screen.getByText('JD')).toBeInTheDocument()
+  })
+
+  it('displays ?? when user has no name', () => {
+    mockUseAuthStore.mockReturnValue({ user: { ...mockUser, name: null } })
+    render(<Sidebar />)
+    expect(screen.getByText('??')).toBeInTheDocument()
+  })
+
+  it('displays ?? when user is null', () => {
+    mockUseAuthStore.mockReturnValue({ user: null })
+    render(<Sidebar />)
+    expect(screen.getByText('??')).toBeInTheDocument()
+  })
+
+  it('calls logout when logout button is clicked', () => {
+    render(<Sidebar />)
+    const logoutButton = screen.getByRole('button', { name: 'Logout' })
+    fireEvent.click(logoutButton)
+    expect(mockLogout).toHaveBeenCalledTimes(1)
+  })
+
+  it('shows notification badge', () => {
+    render(<Sidebar />)
+    expect(screen.getByText('3')).toBeInTheDocument()
+  })
+
+  it('has correct link paths', () => {
+    render(<Sidebar />)
+    expect(screen.getByRole('link', { name: 'Home' })).toHaveAttribute('href', '/')
+    expect(screen.getByRole('link', { name: 'Boards' })).toHaveAttribute('href', '/boards')
+  })
+})
