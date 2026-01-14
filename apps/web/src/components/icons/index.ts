@@ -1,0 +1,7 @@
+export { default as HomeIcon } from './HomeIcon'
+export { default as BoardsIcon } from './BoardsIcon'
+export { default as NotificationsIcon } from './NotificationsIcon'
+export { default as SettingsIcon } from './SettingsIcon'
+export { default as MoonIcon } from './MoonIcon'
+export { default as LogoutIcon } from './LogoutIcon'
+export { default as CreateIcon } from './CreateIcon'
