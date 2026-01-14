@@ -1,33 +1,47 @@
 interface LogoProps {
   size?: 'sm' | 'lg'
+  showText?: boolean
 }
 
-const Logo = ({ size = 'sm' }: LogoProps) => {
-  const sizeClasses = {
-    sm: {
-      container: 'gap-2.5',
-      icon: 'w-10 h-10 rounded-xl shadow-lg shadow-indigo-500/30',
-      letter: 'text-xl',
-      text: 'text-lg',
-    },
-    lg: {
-      container: 'gap-3.5',
-      icon: 'w-14 h-14 rounded-2xl shadow-lg shadow-indigo-500/40',
-      letter: 'text-[28px]',
-      text: 'text-[28px]',
-    },
+const LogoMark = ({ size }: { size: number }) => (
+  <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
+    <defs>
+      <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#6366f1" />
+        <stop offset="50%" stopColor="#8b5cf6" />
+        <stop offset="100%" stopColor="#d946ef" />
+      </linearGradient>
+    </defs>
+    {/* Abstract H formed by three connected vertical bars with a horizontal bridge */}
+    {/* Left column */}
+    <rect x="6" y="8" width="10" height="32" rx="5" fill="url(#logoGradient)" />
+    {/* Right column */}
+    <rect x="32" y="8" width="10" height="32" rx="5" fill="url(#logoGradient)" />
+    {/* Center connecting bridge - offset for visual interest */}
+    <rect x="14" y="18" width="20" height="10" rx="5" fill="url(#logoGradient)" />
+    {/* Collaboration dots - representing connected users/tasks */}
+    <circle cx="11" cy="12" r="3" fill="white" fillOpacity="0.9" />
+    <circle cx="37" cy="12" r="3" fill="white" fillOpacity="0.9" />
+    <circle cx="24" cy="23" r="3" fill="white" fillOpacity="0.9" />
+  </svg>
+)
+
+const Logo = ({ size = 'sm', showText = true }: LogoProps) => {
+  const sizeConfig = {
+    sm: { icon: 40, gap: 'gap-2.5', text: 'text-lg' },
+    lg: { icon: 56, gap: 'gap-3.5', text: 'text-[28px]' },
   }
 
-  const classes = sizeClasses[size]
+  const config = sizeConfig[size]
 
   return (
-    <div className={`flex items-center ${classes.container}`}>
-      <div
-        className={`${classes.icon} bg-gradient-to-br from-indigo-500 via-violet-500 to-fuchsia-500 flex items-center justify-center animate-gradient-shift bg-[length:200%_200%]`}
-      >
-        <span className={`${classes.letter} font-bold text-white font-mono`}>H</span>
-      </div>
-      <span className={`${classes.text} font-semibold text-white tracking-tight`}>HelloCollab</span>
+    <div className={`flex items-center ${config.gap}`}>
+      <LogoMark size={config.icon} />
+      {showText && (
+        <span className={`${config.text} font-semibold text-white tracking-tight`}>
+          HelloCollab
+        </span>
+      )}
     </div>
   )
 }
