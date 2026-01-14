@@ -87,7 +87,7 @@ export default function DashboardPage() {
                     className="w-10 h-10 rounded-xl mb-4 flex items-center justify-center text-white text-lg"
                     style={{ backgroundColor: board.color }}
                   >
-                    {board.name[0]}
+                    {board.name?.[0] || '?'}
                   </div>
                   <h3 className="text-base font-medium text-theme-dark-text mb-2">{board.name}</h3>
                   <div className="flex items-center justify-between text-sm text-theme-dark-text-secondary">

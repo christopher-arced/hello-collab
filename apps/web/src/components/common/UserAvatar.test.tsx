@@ -52,4 +52,9 @@ describe('UserAvatar', () => {
     const avatar = screen.getByText('T')
     expect(avatar).toHaveClass('rounded-full')
   })
+
+  it('renders fallback "?" for empty name', () => {
+    render(<UserAvatar name="" />)
+    expect(screen.getByText('?')).toBeInTheDocument()
+  })
 })

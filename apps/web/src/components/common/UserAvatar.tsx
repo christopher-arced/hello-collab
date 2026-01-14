@@ -31,7 +31,7 @@ export default function UserAvatar({ name, size = 'md' }: UserAvatarProps) {
       className={`${sizeClasses[size]} rounded-full flex items-center justify-center font-semibold text-white`}
       style={{ backgroundColor: getAvatarColor(name) }}
     >
-      {name[0].toUpperCase()}
+      {name?.[0]?.toUpperCase() || '?'}
     </div>
   )
 }
