@@ -50,7 +50,10 @@ export default function DashboardPage() {
                 Here's what's happening with your projects today.
               </p>
             </div>
-            <button className="px-5 py-3 bg-theme-gradient border-none rounded-[10px] text-white text-sm font-medium cursor-pointer flex items-center gap-2 shadow-accent-glow-dark hover:opacity-90 transition-opacity">
+            <button
+              type="button"
+              className="px-5 py-3 bg-theme-gradient border-none rounded-[10px] text-white text-sm font-medium cursor-pointer flex items-center gap-2 shadow-accent-glow-dark hover:opacity-90 transition-opacity"
+            >
               <CreateIcon size={16} /> New Board
             </button>
           </div>
@@ -73,19 +76,25 @@ export default function DashboardPage() {
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-theme-dark-text">Your Boards</h2>
-              <button className="text-sm text-theme-dark-accent hover:text-theme-dark-accent-hover transition-colors bg-transparent border-none cursor-pointer">
+              <button
+                type="button"
+                className="text-sm text-theme-dark-accent hover:text-theme-dark-accent-hover transition-colors bg-transparent border-none cursor-pointer"
+              >
                 View all
               </button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {boards.map((board) => (
-                <div
+                <button
+                  type="button"
                   key={board.name}
-                  className="bg-theme-dark-bg-card border border-theme-dark-border rounded-2xl p-5 cursor-pointer hover:border-theme-dark-border-hover transition-colors"
+                  className="bg-theme-dark-bg-card border border-theme-dark-border rounded-2xl p-5 cursor-pointer hover:border-theme-dark-border-hover transition-colors text-left"
+                  aria-label={`Open ${board.name} board`}
                 >
                   <div
                     className="w-10 h-10 rounded-xl mb-4 flex items-center justify-center text-white text-lg"
                     style={{ backgroundColor: board.color }}
+                    aria-hidden="true"
                   >
                     {board.name?.[0] || '?'}
                   </div>
@@ -94,7 +103,7 @@ export default function DashboardPage() {
                     <span>{board.tasks} tasks</span>
                     <span>{board.members} members</span>
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           </div>

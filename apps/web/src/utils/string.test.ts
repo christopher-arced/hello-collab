@@ -34,4 +34,9 @@ describe('getInitials', () => {
   it('handles names with multiple spaces between words', () => {
     expect(getInitials('John    Smith')).toBe('JS')
   })
+
+  it('returns fallback for empty string', () => {
+    expect(getInitials('')).toBe('??')
+    expect(getInitials('   ')).toBe('??')
+  })
 })
