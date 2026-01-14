@@ -1,4 +1,5 @@
 import Sidebar from '@/components/common/Sidebar'
+import { UserAvatar } from '@/components/common'
 import { CreateIcon } from '@/components/icons'
 import { useAuthStore } from '@/stores'
 
@@ -55,7 +56,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             {stats.map((stat) => (
               <div
                 key={stat.label}
@@ -76,7 +77,7 @@ export default function DashboardPage() {
                 View all
               </button>
             </div>
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {boards.map((board) => (
                 <div
                   key={board.name}
@@ -104,9 +105,7 @@ export default function DashboardPage() {
             <div className="bg-theme-dark-bg-card border border-theme-dark-border rounded-2xl divide-y divide-theme-dark-border">
               {activities.map((activity, i) => (
                 <div key={i} className="px-5 py-4 flex items-center gap-3">
-                  <div className="w-8 h-8 bg-theme-gradient rounded-full flex items-center justify-center text-xs font-semibold text-white">
-                    {activity.user[0]}
-                  </div>
+                  <UserAvatar name={activity.user} />
                   <p className="flex-1 text-sm text-theme-dark-text-secondary">
                     <span className="text-theme-dark-text font-medium">{activity.user}</span>{' '}
                     {activity.action}{' '}
