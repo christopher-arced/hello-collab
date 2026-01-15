@@ -4,15 +4,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useAuthStore, useThemeStore } from '@/stores'
 import { getInitials } from '@/utils'
 import Logo from '../features/auth/Logo'
-import {
-  HomeIcon,
-  BoardsIcon,
-  NotificationsIcon,
-  SettingsIcon,
-  MoonIcon,
-  SunIcon,
-  LogoutIcon,
-} from '../icons'
+import { HomeIcon, NotificationsIcon, SettingsIcon, MoonIcon, SunIcon, LogoutIcon } from '../icons'
 
 interface NavLink {
   icon: React.FC
@@ -26,10 +18,7 @@ interface NavAction {
   badge?: number
 }
 
-const navLinks: NavLink[] = [
-  { icon: HomeIcon, label: 'Home', path: '/' },
-  { icon: BoardsIcon, label: 'Boards', path: '/boards' },
-]
+const navLinks: NavLink[] = [{ icon: HomeIcon, label: 'Home', path: '/' }]
 
 const navActions: NavAction[] = [
   { icon: NotificationsIcon, label: 'Notifications', badge: 3 },

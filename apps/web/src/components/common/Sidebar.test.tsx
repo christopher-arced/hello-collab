@@ -46,7 +46,6 @@ describe('Sidebar', () => {
   it('renders navigation links', () => {
     render(<Sidebar />)
     expect(screen.getByRole('link', { name: 'Home' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Boards' })).toBeInTheDocument()
   })
 
   it('renders action buttons', () => {
@@ -95,6 +94,5 @@ describe('Sidebar', () => {
   it('has correct link paths', () => {
     render(<Sidebar />)
     expect(screen.getByRole('link', { name: 'Home' })).toHaveAttribute('href', '/')
-    expect(screen.getByRole('link', { name: 'Boards' })).toHaveAttribute('href', '/boards')
   })
 })
