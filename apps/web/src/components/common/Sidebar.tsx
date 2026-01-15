@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useCallback } from 'react'
 import { useAuth } from '@/hooks/useAuth'
-import { useAuthStore } from '@/stores'
+import { useAuthStore, useThemeStore } from '@/stores'
 import { getInitials } from '@/utils'
 import Logo from '../features/auth/Logo'
 import {
@@ -10,6 +10,7 @@ import {
   NotificationsIcon,
   SettingsIcon,
   MoonIcon,
+  SunIcon,
   LogoutIcon,
 } from '../icons'
 
@@ -39,12 +40,13 @@ const baseButtonStyles =
   'w-11 h-11 rounded-xl flex items-center justify-center relative transition-all duration-200 ease-in-out'
 
 const inactiveStyles =
-  'text-theme-dark-text-secondary hover:text-theme-dark-text hover:bg-theme-dark-bg-hover'
-const activeStyles = 'bg-theme-dark-accent text-white'
+  'text-theme-text-secondary dark:text-theme-dark-text-secondary hover:text-theme-text dark:hover:text-theme-dark-text hover:bg-theme-bg-hover dark:hover:bg-theme-dark-bg-hover'
+const activeStyles = 'bg-theme-accent dark:bg-theme-dark-accent text-white'
 
 const Sidebar = () => {
   const { logout } = useAuth()
   const { user } = useAuthStore()
+  const { resolvedTheme, toggleTheme } = useThemeStore()
   const location = useLocation()
 
   const isActive = useCallback(
@@ -56,7 +58,7 @@ const Sidebar = () => {
   )
 
   return (
-    <aside className="w-[72px] min-h-screen bg-theme-dark-bg-secondary border-r border-solid border-theme-dark-border flex flex-col items-center py-4 gap-2">
+    <aside className="w-[72px] min-h-screen bg-theme-bg-secondary dark:bg-theme-dark-bg-secondary border-r border-solid border-theme-border dark:border-theme-dark-border flex flex-col items-center py-4 gap-2">
       <Logo size="sm" showText={false} />
 
       <nav className="flex flex-col items-center gap-2">
@@ -83,7 +85,7 @@ const Sidebar = () => {
           >
             <item.icon />
             {item.badge && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-theme-dark-danger rounded-full text-[10px] font-semibold text-white flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-theme-danger dark:bg-theme-dark-danger rounded-full text-[10px] font-semibold text-white flex items-center justify-center">
                 {item.badge}
               </span>
             )}
@@ -95,10 +97,11 @@ const Sidebar = () => {
 
       <button
         aria-label="Toggle theme"
-        title="Toggle theme"
+        title={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+        onClick={toggleTheme}
         className={`${baseButtonStyles} ${inactiveStyles} border-none bg-transparent cursor-pointer`}
       >
-        <MoonIcon />
+        {resolvedTheme === 'dark' ? <MoonIcon /> : <SunIcon />}
       </button>
 
       <div
@@ -112,7 +115,7 @@ const Sidebar = () => {
         aria-label="Logout"
         title="Logout"
         onClick={() => logout()}
-        className={`${baseButtonStyles} border-none bg-transparent cursor-pointer text-theme-dark-text-secondary hover:text-theme-dark-danger hover:bg-theme-dark-bg-hover`}
+        className={`${baseButtonStyles} border-none bg-transparent cursor-pointer text-theme-text-secondary dark:text-theme-dark-text-secondary hover:text-theme-danger dark:hover:text-theme-dark-danger hover:bg-theme-bg-hover dark:hover:bg-theme-dark-bg-hover`}
       >
         <LogoutIcon />
       </button>

@@ -123,7 +123,7 @@ describe('RegisterForm', () => {
     render(<RegisterForm />)
 
     const passwordInput = screen.getByLabelText(/^password$/i)
-    const toggleButton = screen.getAllByRole('button').find((btn) => btn.textContent === '👁️')
+    const toggleButton = screen.getByRole('button', { name: /show password/i })
 
     expect(passwordInput).toHaveAttribute('type', 'password')
 

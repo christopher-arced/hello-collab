@@ -29,11 +29,11 @@ const Button = ({
     gradient:
       'py-4 px-4 border-none rounded-xl text-[15px] font-semibold bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500 bg-[length:200%_200%] text-white shadow-[0_8px_32px_rgba(99,102,241,0.35)] hover:shadow-[0_12px_40px_rgba(99,102,241,0.45)]',
     secondary:
-      'py-4 px-4 rounded-xl text-[15px] font-semibold bg-white/[0.03] border border-white/[0.08] text-white hover:bg-white/[0.06] hover:border-white/[0.15]',
+      'py-4 px-4 rounded-xl text-[15px] font-semibold bg-black/[0.03] dark:bg-white/[0.03] border border-black/[0.08] dark:border-white/[0.08] text-theme-text dark:text-white hover:bg-black/[0.06] dark:hover:bg-white/[0.06] hover:border-black/[0.15] dark:hover:border-white/[0.15]',
     ghost:
-      'py-4 px-4 border-none rounded-xl text-[15px] font-semibold bg-transparent text-white hover:bg-white/[0.05]',
+      'py-4 px-4 border-none rounded-xl text-[15px] font-semibold bg-transparent text-theme-text dark:text-white hover:bg-black/[0.05] dark:hover:bg-white/[0.05]',
     outline:
-      'py-2 px-4 bg-transparent border border-white/10 rounded-lg text-white text-sm font-medium hover:bg-white/5 hover:border-white/20',
+      'py-2 px-4 bg-transparent border border-black/10 dark:border-white/10 rounded-lg text-theme-text dark:text-white text-sm font-medium hover:bg-black/5 dark:hover:bg-white/5 hover:border-black/20 dark:hover:border-white/20',
   }
 
   const widthClasses = fullWidth ? 'w-full' : ''

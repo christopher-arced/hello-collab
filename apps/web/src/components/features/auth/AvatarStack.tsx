@@ -13,7 +13,7 @@ interface AvatarStackProps {
 const AvatarStack = ({
   avatars,
   size = 'md',
-  borderColor = 'border-theme-dark-bg-surface',
+  borderColor = 'border-theme-bg-surface dark:border-theme-dark-bg-surface',
 }: AvatarStackProps) => {
   const sizeClasses = {
     sm: {
