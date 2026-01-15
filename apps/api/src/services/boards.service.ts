@@ -43,7 +43,7 @@ export async function updateBoard(
   userId: string,
   data: UpdateBoardInput
 ): Promise<Board | null> {
-  const board = await prisma.board.findFirst({
+  const result = await prisma.board.updateMany({
     where: {
       id: boardId,
       OR: [
@@ -51,17 +51,17 @@ export async function updateBoard(
         { members: { some: { userId, role: { in: ['OWNER', 'EDITOR'] } } } },
       ],
     },
-  })
-
-  if (!board) return null
-
-  return prisma.board.update({
-    where: { id: boardId },
     data: {
       ...(data.title !== undefined && { title: data.title }),
       ...(data.description !== undefined && { description: data.description }),
       ...(data.bgColor !== undefined && { bgColor: data.bgColor }),
     },
+  })
+
+  if (result.count === 0) return null
+
+  return prisma.board.findUnique({
+    where: { id: boardId },
     select: {
       id: true,
       title: true,
