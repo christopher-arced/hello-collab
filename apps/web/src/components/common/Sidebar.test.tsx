@@ -80,6 +80,13 @@ describe('Sidebar', () => {
     expect(mockLogout).toHaveBeenCalledTimes(1)
   })
 
+  it('calls toggleTheme when theme toggle button is clicked', () => {
+    render(<Sidebar />)
+    const themeToggle = screen.getByRole('button', { name: 'Toggle theme' })
+    fireEvent.click(themeToggle)
+    expect(mockToggleTheme).toHaveBeenCalledTimes(1)
+  })
+
   it('shows notification badge', () => {
     render(<Sidebar />)
     expect(screen.getByText('3')).toBeInTheDocument()
