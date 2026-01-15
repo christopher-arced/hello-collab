@@ -68,7 +68,7 @@ export function useBoard(boardId: string) {
     onSuccess: (updatedBoard) => {
       queryClient.setQueryData<Board>(BOARD_KEYS.detail(boardId), updatedBoard)
       queryClient.setQueryData<Board[]>(BOARD_KEYS.all, (old) =>
-        old?.map((b) => (b.id === boardId ? updatedBoard : b))
+        old ? old.map((b) => (b.id === boardId ? updatedBoard : b)) : old
       )
     },
   })
@@ -81,7 +81,7 @@ export function useBoard(boardId: string) {
     onSuccess: () => {
       queryClient.removeQueries({ queryKey: BOARD_KEYS.detail(boardId) })
       queryClient.setQueryData<Board[]>(BOARD_KEYS.all, (old) =>
-        old?.filter((b) => b.id !== boardId)
+        old ? old.filter((b) => b.id !== boardId) : old
       )
     },
   })

@@ -75,17 +75,14 @@ export async function updateBoard(
 }
 
 export async function deleteBoard(boardId: string, userId: string): Promise<boolean> {
-  const board = await prisma.board.findFirst({
+  const result = await prisma.board.deleteMany({
     where: {
       id: boardId,
       ownerId: userId,
     },
   })
 
-  if (!board) return false
-
-  await prisma.board.delete({ where: { id: boardId } })
-  return true
+  return result.count > 0
 }
 
 export async function createBoard(data: CreateBoardInput, ownerId: string): Promise<Board> {
