@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import authRoutes from './routes/auth'
+import boardsRoutes from './routes/boards'
 
 export function createApp() {
   const app = express()
@@ -25,6 +26,7 @@ export function createApp() {
   })
 
   app.use('/api/auth', authRoutes)
+  app.use('/api/boards', boardsRoutes)
 
   app.use(
     (err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
