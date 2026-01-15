@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { registerSchema } from '@hello/validation'
 import { Input, Button, Checkbox } from '../../common'
+import { UserIcon, EmailIcon, LockIcon, KeyIcon, EyeIcon, EyeOffIcon } from '../../icons'
 import { useAuth } from '../../../hooks/useAuth'
 
 const registerFormSchema = registerSchema
@@ -75,7 +76,7 @@ const RegisterForm = () => {
 
   return (
     <>
-      <h2 className="text-[28px] font-semibold text-white mb-2 tracking-tight">
+      <h2 className="text-[28px] font-semibold text-theme-text dark:text-white mb-2 tracking-tight">
         Create your account
       </h2>
 
@@ -91,7 +92,7 @@ const RegisterForm = () => {
             label="Full name"
             type="text"
             placeholder="John Doe"
-            leftElement="👤"
+            leftElement={<UserIcon size={18} />}
             errorMessage={errors.name?.message}
             {...register('name')}
           />
@@ -102,7 +103,7 @@ const RegisterForm = () => {
             label="Work email"
             type="email"
             placeholder="you@company.com"
-            leftElement="✉️"
+            leftElement={<EmailIcon size={18} />}
             errorMessage={errors.email?.message}
             {...register('email')}
           />
@@ -113,16 +114,16 @@ const RegisterForm = () => {
             label="Password"
             type={showPassword ? 'text' : 'password'}
             placeholder="Create a strong password"
-            leftElement="🔒"
+            leftElement={<LockIcon size={18} />}
             errorMessage={errors.password?.message}
             rightElement={
               <button
                 type="button"
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
                 onClick={() => setShowPassword(!showPassword)}
-                className="bg-transparent border-none text-theme-text-secondary cursor-pointer p-1 text-sm"
+                className="bg-transparent border-none text-theme-text-secondary dark:text-theme-dark-text-secondary cursor-pointer p-1"
               >
-                {showPassword ? '🙈' : '👁️'}
+                {showPassword ? <EyeOffIcon size={18} /> : <EyeIcon size={18} />}
               </button>
             }
             {...register('password')}
@@ -137,7 +138,7 @@ const RegisterForm = () => {
                     className={`flex-1 h-[3px] rounded-sm transition-all duration-300 ${
                       level <= passwordStrength.level
                         ? passwordStrength.color
-                        : 'bg-theme-dark-border'
+                        : 'bg-theme-border dark:bg-theme-dark-border'
                     }`}
                   />
                 ))}
@@ -154,7 +155,7 @@ const RegisterForm = () => {
             label="Confirm password"
             type={showPassword ? 'text' : 'password'}
             placeholder="Confirm your password"
-            leftElement="🔐"
+            leftElement={<KeyIcon size={18} />}
             errorMessage={errors.confirmPassword?.message}
             rightElement={
               passwordsMatch ? <span className="text-green-500 text-base">✓</span> : null

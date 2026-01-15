@@ -22,7 +22,12 @@ export default {
         },
         // Light theme (default)
         theme: {
+          'bg-base': '#f5f5f5',
           bg: '#fafafa',
+          'bg-deep': '#f0f0f5',
+          'bg-panel': '#ffffff',
+          'bg-elevated': '#ffffff',
+          'bg-surface': '#fafafa',
           'bg-secondary': '#ffffff',
           'bg-tertiary': '#f5f5f5',
           'bg-card': '#ffffff',

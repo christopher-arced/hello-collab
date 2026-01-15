@@ -1,4 +1,6 @@
 import { Button } from '@/components/common'
+import { MoonIcon, SunIcon } from '@/components/icons'
+import { useThemeStore } from '@/stores'
 import AvatarStack from '../components/features/auth/AvatarStack'
 import FloatingCard from '../components/features/auth/FloatingCard'
 import GradientOrb from '../components/features/auth/GradientOrb'
@@ -8,10 +10,12 @@ import RegisterForm from '../components/features/auth/RegisterForm'
 import { Link } from 'react-router-dom'
 
 const RegisterPage = () => {
+  const { resolvedTheme, toggleTheme } = useThemeStore()
+
   return (
-    <div className="min-h-screen flex bg-theme-dark-bg-base font-sans relative overflow-hidden">
+    <div className="min-h-screen flex bg-theme-bg-base dark:bg-theme-dark-bg-base font-sans relative overflow-hidden">
       {/* Left Panel - Branding & Graphics */}
-      <div className="flex-1 bg-gradient-to-br from-theme-dark-bg-elevated via-theme-dark-bg-surface to-theme-dark-bg-deep flex flex-col justify-center items-center p-[60px] relative">
+      <div className="flex-1 bg-gradient-to-br from-theme-bg-elevated dark:from-theme-dark-bg-elevated via-theme-bg-surface dark:via-theme-dark-bg-surface to-theme-bg-deep dark:to-theme-dark-bg-deep flex flex-col justify-center items-center p-[60px] relative">
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {/* Gradient Orbs */}
@@ -65,7 +69,7 @@ const RegisterPage = () => {
             <Logo size="lg" />
           </div>
 
-          <h1 className="text-[44px] font-bold text-white leading-tight mb-5 tracking-tight">
+          <h1 className="text-[44px] font-bold text-theme-text dark:text-white leading-tight mb-5 tracking-tight">
             Where teams
             <br />
             <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
@@ -73,7 +77,7 @@ const RegisterPage = () => {
             </span>
           </h1>
 
-          <p className="text-[17px] text-theme-dark-text-secondary leading-relaxed mb-10">
+          <p className="text-[17px] text-theme-text-secondary dark:text-theme-dark-text-secondary leading-relaxed mb-10">
             Join thousands of teams managing projects with real-time collaboration, intuitive
             boards, and seamless workflows.
           </p>
@@ -82,7 +86,7 @@ const RegisterPage = () => {
           <div className="flex items-center justify-center gap-4">
             <AvatarStack
               size="md"
-              borderColor="border-theme-dark-bg-elevated"
+              borderColor="border-theme-bg-elevated dark:border-theme-dark-bg-elevated"
               avatars={[
                 { color: 'bg-indigo-500', initials: 'SC' },
                 { color: 'bg-green-500', initials: 'AR' },
@@ -92,7 +96,9 @@ const RegisterPage = () => {
               ]}
             />
             <div className="text-left">
-              <p className="text-sm font-semibold text-white m-0">10,000+ teams</p>
+              <p className="text-sm font-semibold text-theme-text dark:text-white m-0">
+                10,000+ teams
+              </p>
               <p className="text-[13px] text-theme-text-secondary m-0">already collaborating</p>
             </div>
           </div>
@@ -100,12 +106,24 @@ const RegisterPage = () => {
       </div>
 
       {/* Right Panel - Register Form */}
-      <div className="w-[520px] bg-theme-dark-bg-panel border-l border-white/[0.06] flex flex-col justify-center px-14 py-12 relative">
-        <div className="absolute top-8 right-14 flex items-center gap-2">
-          <span className="text-sm text-theme-text-secondary">Already have an account?</span>
-          <Link to="/login">
-            <Button variant="outline">Sign in</Button>
-          </Link>
+      <div className="w-[520px] bg-theme-bg-panel dark:bg-theme-dark-bg-panel border-l border-black/[0.06] dark:border-white/[0.06] flex flex-col justify-center px-14 py-12 relative">
+        <div className="absolute top-8 right-14 flex items-center gap-4">
+          <button
+            aria-label="Toggle theme"
+            title={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            onClick={toggleTheme}
+            className="w-9 h-9 rounded-lg flex items-center justify-center text-theme-text-secondary dark:text-theme-dark-text-secondary hover:bg-theme-bg-hover dark:hover:bg-theme-dark-bg-hover transition-colors border-none bg-transparent cursor-pointer"
+          >
+            {resolvedTheme === 'dark' ? <MoonIcon size={18} /> : <SunIcon size={18} />}
+          </button>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-theme-text-secondary dark:text-theme-dark-text-secondary">
+              Already have an account?
+            </span>
+            <Link to="/login">
+              <Button variant="outline">Sign in</Button>
+            </Link>
+          </div>
         </div>
         <div className="max-w-[400px] mx-auto w-full">
           <RegisterForm />

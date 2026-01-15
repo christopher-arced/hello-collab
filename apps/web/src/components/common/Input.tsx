@@ -19,20 +19,20 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
     const getInputClassName = () => {
       const baseClasses =
-        'w-full py-3.5 rounded-[10px] text-white text-[15px] transition-all duration-200 placeholder:text-theme-dark-text-muted focus:outline-none'
+        'w-full py-3.5 rounded-[10px] text-theme-text dark:text-white text-[15px] transition-all duration-200 placeholder:text-theme-text-muted dark:placeholder:text-theme-dark-text-muted focus:outline-none autofill:shadow-[inset_0_0_0px_1000px_rgb(250,250,250)] dark:autofill:shadow-[inset_0_0_0px_1000px_rgb(30,30,35)] autofill:[-webkit-text-fill-color:theme(colors.theme.text)] dark:autofill:[-webkit-text-fill-color:white]'
 
       const paddingClasses = leftElement ? 'pl-11' : 'pl-4'
       const rightPaddingClasses = rightElement ? 'pr-11' : 'pr-4'
 
       if (hasError) {
-        return `${baseClasses} ${paddingClasses} ${rightPaddingClasses} bg-white/[0.02] border border-red-500/50`
+        return `${baseClasses} ${paddingClasses} ${rightPaddingClasses} bg-black/[0.02] dark:bg-white/[0.02] border border-red-500/50`
       }
 
       if (isFocused) {
         return `${baseClasses} ${paddingClasses} ${rightPaddingClasses} bg-indigo-500/5 border border-indigo-500/50`
       }
 
-      return `${baseClasses} ${paddingClasses} ${rightPaddingClasses} bg-white/[0.02] border border-white/[0.08]`
+      return `${baseClasses} ${paddingClasses} ${rightPaddingClasses} bg-black/[0.02] dark:bg-white/[0.02] border border-black/[0.08] dark:border-white/[0.08]`
     }
 
     return (
@@ -40,7 +40,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-[13px] font-medium text-theme-text-muted mb-2"
+            className="block text-[13px] font-medium text-theme-text-muted dark:text-theme-dark-text-muted mb-2"
           >
             {label}
           </label>
@@ -63,7 +63,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             }}
           />
           {leftElement && (
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base opacity-50">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base text-theme-text-secondary dark:text-theme-dark-text-secondary">
               {leftElement}
             </span>
           )}

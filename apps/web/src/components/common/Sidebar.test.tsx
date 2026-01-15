@@ -10,8 +10,12 @@ vi.mock('../../hooks/useAuth', () => ({
   useAuth: () => mockUseAuth(),
 }))
 
+const mockToggleTheme = vi.fn()
+const mockUseThemeStore = vi.fn()
+
 vi.mock('../../stores', () => ({
   useAuthStore: () => mockUseAuthStore(),
+  useThemeStore: () => mockUseThemeStore(),
 }))
 
 const mockUser = {
@@ -28,6 +32,10 @@ describe('Sidebar', () => {
     vi.clearAllMocks()
     mockUseAuth.mockReturnValue({ logout: mockLogout })
     mockUseAuthStore.mockReturnValue({ user: mockUser })
+    mockUseThemeStore.mockReturnValue({
+      resolvedTheme: 'dark',
+      toggleTheme: mockToggleTheme,
+    })
   })
 
   it('renders logo', () => {

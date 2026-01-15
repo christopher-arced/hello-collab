@@ -23,7 +23,7 @@ const Checkbox = ({ checked, onChange, label, 'aria-label': ariaLabel }: Checkbo
         className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 transition-all duration-200 ${
           checked
             ? 'border border-indigo-500 bg-indigo-500'
-            : 'border border-white/[0.15] bg-transparent'
+            : 'border border-black/[0.15] dark:border-white/[0.15] bg-transparent'
         }`}
       >
         {checked && (
@@ -33,7 +33,9 @@ const Checkbox = ({ checked, onChange, label, 'aria-label': ariaLabel }: Checkbo
         )}
       </div>
       {label && (
-        <span className="text-[13px] text-theme-dark-text-secondary leading-relaxed">{label}</span>
+        <span className="text-[13px] text-theme-text-secondary dark:text-theme-dark-text-secondary leading-relaxed">
+          {label}
+        </span>
       )}
     </label>
   )
