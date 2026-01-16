@@ -1,21 +1,11 @@
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Sidebar from '@/components/common/Sidebar'
 import { UserAvatar } from '@/components/common'
 import { CreateIcon } from '@/components/icons'
 import { useAuthStore } from '@/stores'
-
-const stats = [
-  { label: 'Active Boards', value: '12', trend: '+2 this week' },
-  { label: 'Total Tasks', value: '64', trend: '8 completed today' },
-  { label: 'Team Members', value: '8', trend: '2 online now' },
-  { label: 'Due Soon', value: '5', trend: 'Next 3 days' },
-]
-
-const boards = [
-  { name: 'Product Roadmap', tasks: 24, members: 5, color: '#6366f1' },
-  { name: 'Marketing Campaign', tasks: 18, members: 3, color: '#8b5cf6' },
-  { name: 'Bug Tracker', tasks: 42, members: 6, color: '#d946ef' },
-  { name: 'Design System', tasks: 15, members: 4, color: '#22c55e' },
-]
+import { useBoards } from '@/hooks/useBoards'
+import CreateBoardModal from '@/components/features/boards/CreateBoardModal'
 
 const activities = [
   {
@@ -31,7 +21,10 @@ const activities = [
 ]
 
 export default function DashboardPage() {
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const navigate = useNavigate()
   const user = useAuthStore((state) => state.user)
+  const { boards, isLoading } = useBoards()
   const firstName = user?.name?.split(' ')[0] ?? 'there'
 
   return (
@@ -52,69 +45,93 @@ export default function DashboardPage() {
             </div>
             <button
               type="button"
+              onClick={() => setIsCreateModalOpen(true)}
               className="px-5 py-3 bg-theme-gradient border-none rounded-[10px] text-white text-sm font-medium cursor-pointer flex items-center gap-2 shadow-accent-glow-dark hover:opacity-90 transition-opacity"
             >
               <CreateIcon size={16} /> New Board
             </button>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            {stats.map((stat) => (
-              <div
-                key={stat.label}
-                className="bg-theme-bg-card dark:bg-theme-dark-bg-card border border-theme-border dark:border-theme-dark-border rounded-2xl p-5"
-              >
-                <p className="text-sm text-theme-text-secondary dark:text-theme-dark-text-secondary mb-1">
-                  {stat.label}
-                </p>
-                <p className="text-[32px] font-semibold text-theme-text dark:text-theme-dark-text">
-                  {stat.value}
-                </p>
-                <p className="text-xs text-theme-text-muted dark:text-theme-dark-text-muted mt-1">
-                  {stat.trend}
-                </p>
-              </div>
-            ))}
-          </div>
-
           {/* Boards Section */}
           <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-theme-text dark:text-theme-dark-text">
-                Your Boards
-              </h2>
-              <button
-                type="button"
-                className="text-sm text-theme-accent dark:text-theme-dark-accent hover:text-theme-accent-hover dark:hover:text-theme-dark-accent-hover transition-colors bg-transparent border-none cursor-pointer"
-              >
-                View all
-              </button>
-            </div>
+            <h2 className="text-lg font-semibold text-theme-text dark:text-theme-dark-text mb-4">
+              Recent Boards
+            </h2>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {boards.map((board) => (
-                <button
-                  type="button"
-                  key={board.name}
-                  className="bg-theme-bg-card dark:bg-theme-dark-bg-card border border-theme-border dark:border-theme-dark-border rounded-2xl p-5 cursor-pointer hover:border-theme-border-hover dark:hover:border-theme-dark-border-hover transition-colors text-left"
-                  aria-label={`Open ${board.name} board`}
-                >
-                  <div
-                    className="w-10 h-10 rounded-xl mb-4 flex items-center justify-center text-white text-lg"
-                    style={{ backgroundColor: board.color }}
-                    aria-hidden="true"
+              {isLoading ? (
+                [...Array(4)].map((_, i) => (
+                  <div key={i} className="rounded-xl overflow-hidden animate-pulse">
+                    <div className="h-24 bg-black/10 dark:bg-white/10" />
+                    <div className="bg-theme-bg-card dark:bg-theme-dark-bg-card p-4">
+                      <div className="h-5 bg-black/10 dark:bg-white/10 rounded mb-3 w-3/4" />
+                      <div className="h-4 bg-black/10 dark:bg-white/10 rounded w-1/2" />
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <>
+                  {boards.map((board) => (
+                    <button
+                      type="button"
+                      key={board.id}
+                      onClick={() => navigate(`/board/${board.id}`)}
+                      className="rounded-xl overflow-hidden cursor-pointer shadow-md hover:shadow-xl dark:shadow-black/20 dark:hover:shadow-accent-glow-dark hover:-translate-y-1 transition-all duration-200 text-left group"
+                      aria-label={`Open ${board.title} board`}
+                    >
+                      <div
+                        className="h-24 w-full transition-opacity group-hover:opacity-90"
+                        style={{ backgroundColor: board.bgColor }}
+                        aria-hidden="true"
+                      />
+                      <div className="bg-theme-bg-card dark:bg-theme-dark-bg-card p-4">
+                        <h3 className="text-[15px] font-semibold text-theme-text dark:text-theme-dark-text mb-3">
+                          {board.title}
+                        </h3>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <div className="flex -space-x-1.5">
+                              <div className="w-5 h-5 rounded-full bg-indigo-500 border-2 border-theme-bg-card dark:border-theme-dark-bg-card" />
+                              <div className="w-5 h-5 rounded-full bg-green-500 border-2 border-theme-bg-card dark:border-theme-dark-bg-card" />
+                              <div className="w-5 h-5 rounded-full bg-amber-500 border-2 border-theme-bg-card dark:border-theme-dark-bg-card" />
+                            </div>
+                            {(board.members?.length ?? 0) > 3 && (
+                              <span className="ml-1.5 text-xs text-theme-text-muted dark:text-theme-dark-text-muted">
+                                +{(board.members?.length ?? 0) - 3}
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-xs text-theme-text-muted dark:text-theme-dark-text-muted">
+                            {board.lists?.reduce(
+                              (acc, list) => acc + (list.cards?.length ?? 0),
+                              0
+                            ) ?? 0}{' '}
+                            cards
+                          </span>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+
+                  {/* Create new board card */}
+                  <button
+                    type="button"
+                    onClick={() => setIsCreateModalOpen(true)}
+                    className="rounded-xl border-2 border-dashed border-theme-border dark:border-theme-dark-border hover:border-theme-text-muted dark:hover:border-theme-dark-text-muted transition-colors cursor-pointer bg-transparent flex flex-col items-center justify-center min-h-[156px]"
+                    aria-label="Create new board"
                   >
-                    {board.name?.[0] || '?'}
-                  </div>
-                  <h3 className="text-base font-medium text-theme-text dark:text-theme-dark-text mb-2">
-                    {board.name}
-                  </h3>
-                  <div className="flex items-center justify-between text-sm text-theme-text-secondary dark:text-theme-dark-text-secondary">
-                    <span>{board.tasks} tasks</span>
-                    <span>{board.members} members</span>
-                  </div>
-                </button>
-              ))}
+                    <div className="w-10 h-10 rounded-full bg-theme-text-muted/20 dark:bg-theme-dark-text-muted/20 flex items-center justify-center mb-3">
+                      <CreateIcon
+                        size={20}
+                        className="text-theme-text-muted dark:text-theme-dark-text-muted"
+                      />
+                    </div>
+                    <span className="text-sm text-theme-text-muted dark:text-theme-dark-text-muted">
+                      Create new board
+                    </span>
+                  </button>
+                </>
+              )}
             </div>
           </div>
 
@@ -154,6 +171,8 @@ export default function DashboardPage() {
           </div>
         </div>
       </main>
+
+      <CreateBoardModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
     </div>
   )
 }
