@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import type { List } from '@hello/types'
 import { Button } from '../../common'
+import { MoreHorizontalIcon, CloseIcon } from '../../icons'
 
 interface BoardCanvasProps {
   lists: List[]
@@ -13,20 +14,6 @@ interface BoardCanvasProps {
   isUpdating?: boolean
   isDeleting?: boolean
 }
-
-const MoreIcon = () => (
-  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="12" r="1" />
-    <circle cx="19" cy="12" r="1" />
-    <circle cx="5" cy="12" r="1" />
-  </svg>
-)
-
-const CloseIcon = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M18 6L6 18M6 6l12 12" />
-  </svg>
-)
 
 interface ListCardProps {
   list: List
@@ -107,7 +94,7 @@ function ListCard({ list, onUpdateTitle, onDelete, isUpdating, isDeleting }: Lis
             className="p-1.5 rounded transition-colors text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
             aria-label="List options"
           >
-            <MoreIcon />
+            <MoreHorizontalIcon size={16} />
           </button>
 
           {showMenu && (
@@ -218,7 +205,7 @@ function AddListForm({ onAdd, isAdding }: AddListFormProps) {
             className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded transition-colors"
             aria-label="Cancel"
           >
-            <CloseIcon />
+            <CloseIcon size={20} />
           </button>
         </div>
       </form>
