@@ -3,6 +3,7 @@ import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import authRoutes from './routes/auth'
 import boardsRoutes from './routes/boards'
+import listsRoutes from './routes/lists'
 
 export function createApp() {
   const app = express()
@@ -27,10 +28,10 @@ export function createApp() {
 
   app.use('/api/auth', authRoutes)
   app.use('/api/boards', boardsRoutes)
+  app.use('/api', listsRoutes)
 
   app.use(
     (err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-      // eslint-disable-next-line no-console
       console.error(err.stack)
       res.status(500).json({
         error: 'Internal Server Error',
