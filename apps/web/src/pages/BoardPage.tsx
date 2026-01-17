@@ -5,7 +5,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { updateBoardSchema, UpdateBoardInput } from '@hello/validation'
 import Sidebar from '@/components/common/Sidebar'
 import { Input, Button, Modal } from '@/components/common'
+import { BoardCanvas } from '@/components/features/lists'
 import { useBoard } from '@/hooks/useBoards'
+import { useLists } from '@/hooks/useLists'
 
 const BOARD_COLORS = [
   '#6366f1',
@@ -41,6 +43,17 @@ export default function BoardPage() {
   } = useBoard(id!)
 
   const {
+    lists,
+    isLoading: isLoadingLists,
+    createListAsync,
+    isCreating: isCreatingList,
+    updateList,
+    isUpdating: isUpdatingList,
+    deleteListAsync,
+    isDeleting: isDeletingList,
+  } = useLists(id!)
+
+  const {
     register,
     handleSubmit,
     watch,
@@ -64,22 +77,12 @@ export default function BoardPage() {
     setIsEditModalOpen(true)
   }
 
-  const onSubmit = async (data: UpdateBoardInput) => {
-    try {
-      await updateBoardAsync(data)
-      setIsEditModalOpen(false)
-    } catch {
-      // Error handled by updateError state
-    }
+  const onSubmit = (data: UpdateBoardInput) => {
+    updateBoardAsync(data).then(() => setIsEditModalOpen(false))
   }
 
-  const handleDelete = async () => {
-    try {
-      await deleteBoardAsync()
-      navigate('/')
-    } catch {
-      // Error handled
-    }
+  const handleDelete = () => {
+    deleteBoardAsync().then(() => navigate('/'))
   }
 
   const handleCloseEditModal = () => {
@@ -129,7 +132,7 @@ export default function BoardPage() {
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Board Header */}
         <div className="px-8 py-6" style={{ backgroundColor: board.bgColor }}>
-          <div className="max-w-[1200px] mx-auto flex items-center justify-between">
+          <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-white mb-1">{board.title}</h1>
               {board.description && <p className="text-white/80 text-sm">{board.description}</p>}
@@ -153,16 +156,22 @@ export default function BoardPage() {
           </div>
         </div>
 
-        {/* Board Content - Lists will go here */}
-        <div className="flex-1 p-8 overflow-x-auto">
-          <div className="max-w-[1200px] mx-auto">
-            <div className="bg-theme-bg-card dark:bg-theme-dark-bg-card border border-theme-border dark:border-theme-dark-border rounded-xl p-8 text-center">
-              <p className="text-theme-text-secondary dark:text-theme-dark-text-secondary">
-                Lists and cards coming soon...
-              </p>
-            </div>
-          </div>
-        </div>
+        {/* Board Content - Lists */}
+        <BoardCanvas
+          lists={lists}
+          boardColor={board.bgColor}
+          isLoading={isLoadingLists}
+          onCreateList={async (title) => {
+            await createListAsync({ title })
+          }}
+          onUpdateList={(listId, title) => updateList({ listId, data: { title } })}
+          onDeleteList={async (listId) => {
+            await deleteListAsync(listId)
+          }}
+          isCreating={isCreatingList}
+          isUpdating={isUpdatingList}
+          isDeleting={isDeletingList}
+        />
       </main>
 
       {/* Edit Board Modal */}
