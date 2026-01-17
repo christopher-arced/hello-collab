@@ -77,22 +77,12 @@ export default function BoardPage() {
     setIsEditModalOpen(true)
   }
 
-  const onSubmit = async (data: UpdateBoardInput) => {
-    try {
-      await updateBoardAsync(data)
-      setIsEditModalOpen(false)
-    } catch {
-      // Error handled by updateError state
-    }
+  const onSubmit = (data: UpdateBoardInput) => {
+    updateBoardAsync(data).then(() => setIsEditModalOpen(false))
   }
 
-  const handleDelete = async () => {
-    try {
-      await deleteBoardAsync()
-      navigate('/')
-    } catch {
-      // Error handled
-    }
+  const handleDelete = () => {
+    deleteBoardAsync().then(() => navigate('/'))
   }
 
   const handleCloseEditModal = () => {
@@ -172,11 +162,7 @@ export default function BoardPage() {
           boardColor={board.bgColor}
           isLoading={isLoadingLists}
           onCreateList={async (title) => {
-            try {
-              await createListAsync({ title })
-            } catch {
-              // Error handled by hook
-            }
+            await createListAsync({ title })
           }}
           onUpdateList={(listId, title) => updateList({ listId, data: { title } })}
           onDeleteList={async (listId) => {

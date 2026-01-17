@@ -246,13 +246,7 @@ export default function BoardCanvas({
                 key={list.id}
                 list={list}
                 onUpdateTitle={(title) => onUpdateList(list.id, title)}
-                onDelete={async () => {
-                  try {
-                    await onDeleteList(list.id)
-                  } catch {
-                    // Error handled
-                  }
-                }}
+                onDelete={() => onDeleteList(list.id)}
                 isUpdating={isUpdating}
                 isDeleting={isDeleting}
               />
