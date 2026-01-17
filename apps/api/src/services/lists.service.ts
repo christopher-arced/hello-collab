@@ -50,20 +50,22 @@ export async function createList(
   const hasAccess = await verifyBoardAccess(boardId, userId, true)
   if (!hasAccess) return null
 
-  const maxPosition = await prisma.list.aggregate({
-    where: { boardId },
-    _max: { position: true },
-  })
+  return prisma.$transaction(async (tx) => {
+    const maxPosition = await tx.list.aggregate({
+      where: { boardId },
+      _max: { position: true },
+    })
 
-  const position = data.position ?? (maxPosition._max.position ?? -1) + 1
+    const position = data.position ?? (maxPosition._max.position ?? -1) + 1
 
-  return prisma.list.create({
-    data: {
-      title: data.title,
-      boardId,
-      position,
-    },
-    select: listSelect,
+    return tx.list.create({
+      data: {
+        title: data.title,
+        boardId,
+        position,
+      },
+      select: listSelect,
+    })
   })
 }
 
@@ -118,30 +120,30 @@ export async function reorderLists(
   const hasAccess = await verifyBoardAccess(boardId, userId, true)
   if (!hasAccess) return null
 
-  const existingLists = await prisma.list.findMany({
-    where: { boardId },
-    select: { id: true },
-  })
+  return prisma.$transaction(async (tx) => {
+    const existingLists = await tx.list.findMany({
+      where: { boardId },
+      select: { id: true },
+    })
 
-  const existingIds = new Set(existingLists.map((l) => l.id))
-  const validIds = data.listIds.every((id) => existingIds.has(id))
+    const existingIds = new Set(existingLists.map((l) => l.id))
+    const validIds = data.listIds.every((id) => existingIds.has(id))
 
-  if (!validIds || data.listIds.length !== existingLists.length) {
-    return null
-  }
+    if (!validIds || data.listIds.length !== existingLists.length) {
+      return null
+    }
 
-  await prisma.$transaction(
-    data.listIds.map((id, index) =>
-      prisma.list.update({
-        where: { id },
+    for (let index = 0; index < data.listIds.length; index++) {
+      await tx.list.update({
+        where: { id: data.listIds[index] },
         data: { position: index },
       })
-    )
-  )
+    }
 
-  return prisma.list.findMany({
-    where: { boardId },
-    select: listSelect,
-    orderBy: { position: 'asc' },
+    return tx.list.findMany({
+      where: { boardId },
+      select: listSelect,
+      orderBy: { position: 'asc' },
+    })
   })
 }
