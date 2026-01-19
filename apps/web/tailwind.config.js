@@ -106,6 +106,37 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    function ({ addBase }) {
+      addBase({
+        '.scrollbar-thin': {
+          'scrollbar-width': 'thin',
+          'scrollbar-color': 'rgb(209 213 219 / 0.8) transparent',
+        },
+        '.scrollbar-thin::-webkit-scrollbar': {
+          width: '6px',
+        },
+        '.scrollbar-thin::-webkit-scrollbar-track': {
+          background: 'transparent',
+        },
+        '.scrollbar-thin::-webkit-scrollbar-thumb': {
+          'background-color': 'rgb(209 213 219 / 0.8)',
+          'border-radius': '3px',
+        },
+        '.scrollbar-thin::-webkit-scrollbar-thumb:hover': {
+          'background-color': 'rgb(156 163 175 / 0.8)',
+        },
+        '.dark .scrollbar-thin': {
+          'scrollbar-color': 'rgb(75 85 99 / 0.6) transparent',
+        },
+        '.dark .scrollbar-thin::-webkit-scrollbar-thumb': {
+          'background-color': 'rgb(75 85 99 / 0.6)',
+        },
+        '.dark .scrollbar-thin::-webkit-scrollbar-thumb:hover': {
+          'background-color': 'rgb(107 114 128 / 0.7)',
+        },
+      })
+    },
+  ],
   darkMode: 'class',
 }
