@@ -3,7 +3,7 @@ import type { List } from '@hello/types'
 import type { CreateListInput, UpdateListInput, ReorderListsInput } from '@hello/validation'
 import { fetcher, ApiError } from '../lib/api'
 
-const LIST_KEYS = {
+export const LIST_KEYS = {
   byBoard: (boardId: string) => ['lists', boardId] as const,
 }
 
@@ -64,6 +64,21 @@ export function useLists(boardId: string) {
         method: 'PATCH',
         body: JSON.stringify(data),
       }),
+    onMutate: async (data) => {
+      await queryClient.cancelQueries({ queryKey: LIST_KEYS.byBoard(boardId) })
+      const previous = queryClient.getQueryData<List[]>(LIST_KEYS.byBoard(boardId))
+      queryClient.setQueryData<List[]>(LIST_KEYS.byBoard(boardId), (old) => {
+        if (!old) return old
+        const orderMap = new Map(data.listIds.map((id, index) => [id, index]))
+        return [...old].sort((a, b) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0))
+      })
+      return { previous }
+    },
+    onError: (_, __, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(LIST_KEYS.byBoard(boardId), context.previous)
+      }
+    },
     onSuccess: (reorderedLists) => {
       queryClient.setQueryData<List[]>(LIST_KEYS.byBoard(boardId), reorderedLists)
     },
