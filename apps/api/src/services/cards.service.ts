@@ -188,17 +188,57 @@ export async function moveCard(
     return null
   }
 
+  // Get current card position for same-list move handling
+  const currentCard = await prisma.card.findUnique({
+    where: { id: cardId },
+    select: { position: true, listId: true },
+  })
+
+  if (!currentCard) return null
+
   return prisma.$transaction(async (tx) => {
-    // Shift cards in target list to make room at the target position
-    await tx.card.updateMany({
-      where: {
-        listId: data.toListId,
-        position: { gte: data.position },
-      },
-      data: {
-        position: { increment: 1 },
-      },
-    })
+    const isSameList = currentCard.listId === data.toListId
+
+    if (isSameList) {
+      // Same list move - shift only cards between old and new positions
+      if (currentCard.position < data.position) {
+        // Moving down: decrement positions in between
+        await tx.card.updateMany({
+          where: {
+            listId: data.toListId,
+            position: { gt: currentCard.position, lte: data.position },
+          },
+          data: { position: { decrement: 1 } },
+        })
+      } else if (currentCard.position > data.position) {
+        // Moving up: increment positions in between
+        await tx.card.updateMany({
+          where: {
+            listId: data.toListId,
+            position: { gte: data.position, lt: currentCard.position },
+          },
+          data: { position: { increment: 1 } },
+        })
+      }
+    } else {
+      // Different list move - make room in target list
+      await tx.card.updateMany({
+        where: {
+          listId: data.toListId,
+          position: { gte: data.position },
+        },
+        data: { position: { increment: 1 } },
+      })
+
+      // Close the gap in source list
+      await tx.card.updateMany({
+        where: {
+          listId: currentCard.listId,
+          position: { gt: currentCard.position },
+        },
+        data: { position: { decrement: 1 } },
+      })
+    }
 
     // Move the card to the target list at the target position
     return tx.card.update({
