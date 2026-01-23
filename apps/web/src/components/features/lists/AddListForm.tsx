@@ -56,7 +56,8 @@ export default function AddListForm({ onAdd, isAdding }: AddListFormProps) {
           onChange={(e) => setTitle(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Enter list title..."
-          className="w-full px-3 py-2 text-sm rounded-lg border focus:outline-none bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:border-gray-400 dark:focus:border-gray-500"
+          maxLength={512}
+          className="w-full px-3 py-2 text-sm rounded-lg border focus:outline-none bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:border-gray-400 dark:focus:border-gray-500 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
           disabled={isAdding}
         />
         <div className="flex items-center gap-2 mt-2">

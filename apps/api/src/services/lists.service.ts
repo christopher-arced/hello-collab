@@ -60,7 +60,7 @@ export async function createList(
 
     return tx.list.create({
       data: {
-        title: data.title,
+        title: data.title.trim(),
         boardId,
         position,
       },
@@ -87,7 +87,7 @@ export async function updateList(
   return prisma.list.update({
     where: { id: listId },
     data: {
-      ...(data.title !== undefined && { title: data.title }),
+      ...(data.title !== undefined && { title: data.title.trim() }),
       ...(data.position !== undefined && { position: data.position }),
     },
     select: listSelect,

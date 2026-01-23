@@ -54,12 +54,12 @@ export const updateBoardSchema = z.object({
 
 // List Schemas
 export const createListSchema = z.object({
-  title: z.string().min(1, 'Title is required').max(100, 'Title must be less than 100 characters'),
+  title: z.string().min(1, 'Title is required').max(512, 'Title must be less than 512 characters'),
   position: z.number().int().nonnegative().optional(),
 })
 
 export const updateListSchema = z.object({
-  title: z.string().min(1).max(100).optional(),
+  title: z.string().min(1).max(512).optional(),
   position: z.number().int().nonnegative().optional(),
 })
 
@@ -69,7 +69,7 @@ export const reorderListsSchema = z.object({
 
 // Card Schemas
 export const createCardSchema = z.object({
-  title: z.string().min(1, 'Title is required').max(200, 'Title must be less than 200 characters'),
+  title: z.string().min(1, 'Title is required').max(512, 'Title must be less than 512 characters'),
   description: z
     .string()
     .max(5000, 'Description must be less than 5000 characters')
@@ -79,7 +79,7 @@ export const createCardSchema = z.object({
 })
 
 export const updateCardSchema = z.object({
-  title: z.string().min(1).max(200).optional(),
+  title: z.string().min(1).max(512).optional(),
   description: z.string().max(5000).optional().nullable(),
   dueDate: z.string().datetime().or(z.null()).optional(),
   coverUrl: z.string().url().optional().nullable(),

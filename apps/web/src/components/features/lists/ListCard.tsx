@@ -1,6 +1,9 @@
 import { useState, useRef, useEffect } from 'react'
 import type { List } from '@hello/types'
-import { MoreHorizontalIcon } from '../../icons'
+import { CreateIcon } from '../../icons'
+import { useCards } from '../../../hooks/useCards'
+import { CardItem, AddCardForm } from '../cards'
+import { Button, DropdownMenu } from '@/components/common'
 
 export interface ListCardProps {
   list: List
@@ -19,9 +22,33 @@ export default function ListCard({
 }: ListCardProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [title, setTitle] = useState(list.title)
-  const [showMenu, setShowMenu] = useState(false)
+  const [isAddCardOpen, setIsAddCardOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
-  const menuRef = useRef<HTMLDivElement>(null)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const addCardFormRef = useRef<HTMLDivElement>(null)
+
+  const scrollToBottom = () => {
+    setTimeout(() => {
+      if (addCardFormRef.current) {
+        addCardFormRef.current.scrollIntoView({ behavior: 'auto' })
+      }
+    }, 0)
+  }
+
+  const {
+    cards,
+    isLoading: isLoadingCards,
+    createCardAsync,
+    isCreating: isCreatingCard,
+    updateCard,
+    isUpdating: isUpdatingCard,
+    deleteCard,
+    isDeleting: isDeletingCard,
+  } = useCards(list.id)
+
+  useEffect(() => {
+    setTitle(list.title)
+  }, [list.title])
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -30,18 +57,9 @@ export default function ListCard({
     }
   }, [isEditing])
 
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setShowMenu(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
-
   const handleSubmit = () => {
     const trimmed = title.trim()
+    setTitle(trimmed)
     if (trimmed && trimmed !== list.title) {
       onUpdateTitle(trimmed)
     } else {
@@ -69,56 +87,86 @@ export default function ListCard({
             onChange={(e) => setTitle(e.target.value)}
             onBlur={handleSubmit}
             onKeyDown={handleKeyDown}
-            className="flex-1 px-2 py-1 text-sm rounded bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 focus:border-gray-400 dark:focus:border-gray-500 focus:outline-none"
+            maxLength={512}
+            className="flex-1 px-2 py-1 text-sm rounded bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 focus:border-gray-400 dark:focus:border-gray-500 focus:outline-none text-gray-900 dark:text-gray-100"
             disabled={isUpdating}
           />
         ) : (
           <h3
             onClick={() => setIsEditing(true)}
-            className="flex-1 px-1 py-0.5 text-sm cursor-pointer rounded hover:bg-black/5 dark:hover:bg-white/5 text-gray-800 dark:text-gray-100 font-medium"
+            className="flex-1 min-w-0 px-1 py-0.5 text-sm cursor-pointer rounded hover:bg-black/5 dark:hover:bg-white/5 text-gray-800 dark:text-gray-100 font-medium break-words"
           >
-            {list.title}
+            {title}
           </h3>
         )}
 
-        <div className="relative" ref={menuRef}>
-          <button
-            onClick={() => setShowMenu(!showMenu)}
-            className="p-1.5 rounded transition-colors text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-            aria-label="List options"
-          >
-            <MoreHorizontalIcon size={16} />
-          </button>
+        <DropdownMenu
+          items={[
+            {
+              label: isDeleting ? 'Deleting...' : 'Delete list',
+              onClick: onDelete,
+              disabled: isDeleting,
+              variant: 'danger',
+            },
+          ]}
+          menuWidth="w-48"
+          ariaLabel="List options"
+        />
+      </div>
 
-          {showMenu && (
-            <div className="absolute right-0 top-full mt-1 w-48 rounded-lg z-10 overflow-hidden bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-lg">
-              <button
-                onClick={() => {
-                  setShowMenu(false)
-                  onDelete()
-                }}
-                disabled={isDeleting}
-                className="w-full px-3 py-2 text-left text-sm transition-colors disabled:opacity-50 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
-              >
-                {isDeleting ? 'Deleting...' : 'Delete list'}
-              </button>
+      <div
+        ref={scrollContainerRef}
+        className="flex-1 overflow-x-hidden overflow-y-auto px-3 pb-2 min-h-[80px] scrollbar-thin"
+      >
+        {isLoadingCards ? (
+          <div className="text-center py-6 text-sm text-gray-400 dark:text-gray-500">
+            Loading...
+          </div>
+        ) : cards.length === 0 && !isAddCardOpen ? (
+          <div className="text-center py-6 text-sm text-gray-400 dark:text-gray-500">
+            No cards yet
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {cards.map((card) => (
+              <CardItem
+                key={card.id}
+                card={card}
+                onUpdateTitle={(newTitle) =>
+                  updateCard({ cardId: card.id, data: { title: newTitle } })
+                }
+                onDelete={() => deleteCard(card.id)}
+                isUpdating={isUpdatingCard}
+                isDeleting={isDeletingCard}
+              />
+            ))}
+            <div ref={addCardFormRef}>
+              {isAddCardOpen && (
+                <AddCardForm
+                  onAdd={async (cardTitle) => {
+                    await createCardAsync({ title: cardTitle })
+                  }}
+                  isOpen={isAddCardOpen}
+                  onOpenChange={setIsAddCardOpen}
+                />
+              )}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
-      <div className="flex-1 overflow-y-auto px-3 pb-2 min-h-[80px]">
-        <div className="text-center py-6 text-sm text-gray-400 dark:text-gray-500">
-          Cards coming soon...
-        </div>
-      </div>
-
-      <div className="px-2 pb-2">
-        <button className="w-full py-2 text-sm rounded-lg transition-colors flex items-center justify-center gap-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-          <span className="text-lg leading-none">+</span>
-          <span>Add a card</span>
-        </button>
-      </div>
+      {!isAddCardOpen && !isCreatingCard && (
+        <Button
+          className=" text-sm font-normal flex items-center !px-0"
+          variant="ghost"
+          onClick={() => {
+            setIsAddCardOpen(true)
+            scrollToBottom()
+          }}
+        >
+          <CreateIcon size={14} /> Add a card
+        </Button>
+      )}
     </div>
   )
 }

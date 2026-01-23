@@ -141,14 +141,14 @@ export default function BoardPage() {
               <Button
                 variant="outline"
                 onClick={openEditModal}
-                className="!border-white/30 !text-white hover:!bg-white/10"
+                className="!bg-white/20 !border-white/30 !text-white hover:!bg-white/30"
               >
                 Edit Board
               </Button>
               <Button
                 variant="outline"
                 onClick={() => setIsDeleteModalOpen(true)}
-                className="!border-red-400/50 !text-red-300 hover:!bg-red-500/10"
+                className="!bg-black/20 !border-black/20 !text-white hover:!bg-black/30"
               >
                 Delete
               </Button>

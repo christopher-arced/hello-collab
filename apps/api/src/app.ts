@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser'
 import authRoutes from './routes/auth'
 import boardsRoutes from './routes/boards'
 import listsRoutes from './routes/lists'
+import cardsRoutes from './routes/cards'
 
 export function createApp() {
   const app = express()
@@ -29,6 +30,7 @@ export function createApp() {
   app.use('/api/auth', authRoutes)
   app.use('/api/boards', boardsRoutes)
   app.use('/api', listsRoutes)
+  app.use('/api', cardsRoutes)
 
   app.use(
     (err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

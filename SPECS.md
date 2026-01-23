@@ -702,16 +702,16 @@ gray: { ...tailwind grays }
 - [x] Configure Prisma ORM (v7.2.0 with PostgreSQL adapter)
 - [x] Set up pnpm monorepo with workspaces
 - [x] Create shared packages (types, validation, config, database)
-- [ ] Implement user registration
-- [ ] Implement login with JWT
-- [ ] Create protected routes
-- [ ] Basic UI layout with routing
+- [x] Implement user registration
+- [x] Implement login with JWT
+- [x] Create protected routes
+- [x] Basic UI layout with routing
 
 **Week 2: Core Features**
 
-- [ ] Board CRUD operations
-- [ ] List CRUD operations
-- [ ] Card CRUD operations
+- [x] Board CRUD operations
+- [x] List CRUD operations
+- [x] Card CRUD operations
 - [ ] Drag-and-drop for lists
 - [ ] Drag-and-drop for cards
 - [ ] Position/ordering logic

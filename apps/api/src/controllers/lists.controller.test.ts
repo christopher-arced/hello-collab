@@ -194,7 +194,7 @@ describe('POST /api/boards/:boardId/lists', () => {
       const response = await request(app)
         .post('/api/boards/board-123/lists')
         .set('Cookie', 'accessToken=valid.jwt.token')
-        .send({ title: 'a'.repeat(101) })
+        .send({ title: 'a'.repeat(513) })
 
       expect(response.status).toBe(400)
       expect(response.body.details).toHaveProperty('title')
@@ -293,7 +293,7 @@ describe('PATCH /api/lists/:id', () => {
       const response = await request(app)
         .patch('/api/lists/list-123')
         .set('Cookie', 'accessToken=valid.jwt.token')
-        .send({ title: 'a'.repeat(101) })
+        .send({ title: 'a'.repeat(513) })
 
       expect(response.status).toBe(400)
       expect(response.body.details).toHaveProperty('title')
