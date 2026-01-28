@@ -4,36 +4,46 @@ import { useForm } from 'react-hook-form'
 import { useQueryClient } from '@tanstack/react-query'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { updateBoardSchema, UpdateBoardInput } from '@hello/validation'
-import type { Card } from '@hello/types'
+import type { Card, SocketUser } from '@hello/types'
 import Sidebar from '@/components/common/Sidebar'
-import { Input, Button, Modal } from '@/components/common'
+import { Input, Button, Modal, ErrorAlert } from '@/components/common'
 import { BoardCanvas } from '@/components/features/lists'
+import { ActiveUsers } from '@/components/features/board/ActiveUsers'
+import { BoardMembersPanel } from '@/components/features/board/BoardMembersPanel'
+import { useAuthStore } from '@/stores/authStore'
 import { useBoard } from '@/hooks/useBoards'
 import { useLists } from '@/hooks/useLists'
 import { CARD_KEYS } from '@/hooks/useCards'
+import { useRealtimeSync } from '@/hooks/useRealtimeSync'
 import { fetcher } from '@/lib/api'
-
-const BOARD_COLORS = [
-  '#6366f1',
-  '#8b5cf6',
-  '#d946ef',
-  '#ec4899',
-  '#f43f5e',
-  '#ef4444',
-  '#f97316',
-  '#eab308',
-  '#22c55e',
-  '#14b8a6',
-  '#0ea5e9',
-  '#0079BF',
-]
+import { BOARD_COLORS } from '@/constants/boardColors'
 
 export default function BoardPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const currentUser = useAuthStore((s) => s.user)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [isMembersPanelOpen, setIsMembersPanelOpen] = useState(false)
+  const [activeUsers, setActiveUsers] = useState<SocketUser[]>([])
+
+  // Handle being removed from board - navigate away
+  const handleMemberRemoved = useCallback(
+    (userId: string) => {
+      if (currentUser && userId === currentUser.id) {
+        navigate('/')
+      }
+    },
+    [currentUser, navigate]
+  )
+
+  // Set up real-time sync for this board
+  const { isConnected } = useRealtimeSync(id, {
+    onBoardDeleted: () => navigate('/'),
+    onActiveUsersChange: setActiveUsers,
+    onMemberRemoved: handleMemberRemoved,
+  })
 
   const {
     board,
@@ -178,6 +188,34 @@ export default function BoardPage() {
     [queryClient]
   )
 
+  const handleCreateList = useCallback(
+    async (title: string) => {
+      await createListAsync({ title })
+    },
+    [createListAsync]
+  )
+
+  const handleUpdateList = useCallback(
+    (listId: string, title: string) => {
+      updateList({ listId, data: { title } })
+    },
+    [updateList]
+  )
+
+  const handleDeleteList = useCallback(
+    async (listId: string) => {
+      await deleteListAsync(listId)
+    },
+    [deleteListAsync]
+  )
+
+  const handleReorderLists = useCallback(
+    (listIds: string[]) => {
+      reorderLists({ listIds })
+    },
+    [reorderLists]
+  )
+
   if (isLoading) {
     return (
       <div className="h-screen max-h-screen bg-theme-bg dark:bg-theme-dark-bg flex">
@@ -225,21 +263,51 @@ export default function BoardPage() {
               <h1 className="text-2xl font-bold text-white mb-1">{board.title}</h1>
               {board.description && <p className="text-white/80 text-sm">{board.description}</p>}
             </div>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={openEditModal}
-                className="!bg-white/20 !border-white/30 !text-white hover:!bg-white/30"
-              >
-                Edit Board
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setIsDeleteModalOpen(true)}
-                className="!bg-black/20 !border-black/20 !text-white hover:!bg-black/30"
-              >
-                Delete
-              </Button>
+            <div className="flex items-center gap-4">
+              {/* Connection indicator */}
+              <div className="flex items-center gap-2">
+                <div
+                  className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-yellow-400'}`}
+                  title={isConnected ? 'Real-time sync active' : 'Connecting...'}
+                />
+                <ActiveUsers users={activeUsers} />
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsMembersPanelOpen(true)}
+                  className="!bg-white/20 !border-white/30 !text-white hover:!bg-white/30"
+                >
+                  <svg
+                    className="w-4 h-4 mr-1.5 inline-block"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                    />
+                  </svg>
+                  Share
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={openEditModal}
+                  className="!bg-white/20 !border-white/30 !text-white hover:!bg-white/30"
+                >
+                  Edit Board
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsDeleteModalOpen(true)}
+                  className="!bg-black/20 !border-black/20 !text-white hover:!bg-black/30"
+                >
+                  Delete
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -249,14 +317,10 @@ export default function BoardPage() {
           lists={lists}
           boardColor={board.bgColor}
           isLoading={isLoadingLists}
-          onCreateList={async (title) => {
-            await createListAsync({ title })
-          }}
-          onUpdateList={(listId, title) => updateList({ listId, data: { title } })}
-          onDeleteList={async (listId) => {
-            await deleteListAsync(listId)
-          }}
-          onReorderLists={(listIds) => reorderLists({ listIds })}
+          onCreateList={handleCreateList}
+          onUpdateList={handleUpdateList}
+          onDeleteList={handleDeleteList}
+          onReorderLists={handleReorderLists}
           onReorderCards={handleReorderCards}
           onMoveCard={handleMoveCard}
           isCreating={isCreatingList}
@@ -267,11 +331,7 @@ export default function BoardPage() {
 
       {/* Edit Board Modal */}
       <Modal isOpen={isEditModalOpen} onClose={handleCloseEditModal} title="Edit board">
-        {updateError && (
-          <div role="alert" className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
-            <p className="text-sm text-red-400">{updateError.message}</p>
-          </div>
-        )}
+        {updateError && <ErrorAlert message={updateError.message} />}
 
         <form noValidate onSubmit={handleSubmit(onSubmit)}>
           <div className="mb-5">
@@ -371,6 +431,14 @@ export default function BoardPage() {
           </Button>
         </div>
       </Modal>
+
+      {/* Board Members Panel */}
+      <BoardMembersPanel
+        boardId={id!}
+        boardOwnerId={board.ownerId}
+        isOpen={isMembersPanelOpen}
+        onClose={() => setIsMembersPanelOpen(false)}
+      />
     </div>
   )
 }

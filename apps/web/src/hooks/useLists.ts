@@ -18,6 +18,8 @@ export function useLists(boardId: string) {
     queryKey: LIST_KEYS.byBoard(boardId),
     queryFn: () => fetcher<List[]>(`/api/boards/${boardId}/lists`),
     enabled: !!boardId,
+    // Data is pre-populated by useBoard, keep it fresh for 30 seconds
+    staleTime: 30 * 1000,
   })
 
   const createMutation = useMutation({
@@ -27,9 +29,13 @@ export function useLists(boardId: string) {
         body: JSON.stringify(data),
       }),
     onSuccess: (newList) => {
-      queryClient.setQueryData<List[]>(LIST_KEYS.byBoard(boardId), (old) =>
-        old ? [...old, newList] : [newList]
-      )
+      queryClient.setQueryData<List[]>(LIST_KEYS.byBoard(boardId), (old) => {
+        if (!old) return [newList]
+        // Avoid duplicates - socket event may have already added this list
+        const exists = old.some((l) => l.id === newList.id)
+        if (exists) return old
+        return [...old, newList]
+      })
     },
   })
 

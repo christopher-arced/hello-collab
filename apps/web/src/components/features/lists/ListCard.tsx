@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from 'react'
-import type { List } from '@hello/types'
+import type { List, Card } from '@hello/types'
+import type { UpdateCardInput } from '@hello/validation'
 import { useDroppable, useDndContext } from '@dnd-kit/core'
 import { useSortable, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { CreateIcon, DragIcon } from '../../icons'
 import { useCards } from '../../../hooks/useCards'
-import { CardItem, AddCardForm } from '../cards'
+import { CardItem, AddCardForm, CardDetailModal } from '../cards'
 import { Button, DropdownMenu } from '@/components/common'
 
 export interface ListCardProps {
@@ -28,6 +29,7 @@ export default function ListCard({
   const [isEditing, setIsEditing] = useState(false)
   const [title, setTitle] = useState(list.title)
   const [isAddCardOpen, setIsAddCardOpen] = useState(false)
+  const [selectedCard, setSelectedCard] = useState<Card | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const addCardFormRef = useRef<HTMLDivElement>(null)
@@ -56,10 +58,44 @@ export default function ListCard({
     createCardAsync,
     isCreating: isCreatingCard,
     updateCard,
+    updateCardAsync,
     isUpdating: isUpdatingCard,
+    updateError,
+    resetUpdateError,
     deleteCard,
+    deleteCardAsync,
     isDeleting: isDeletingCard,
   } = useCards(list.id)
+
+  // Keep selected card in sync with cards data (for real-time updates)
+  useEffect(() => {
+    if (selectedCard) {
+      const updatedCard = cards.find((c) => c.id === selectedCard.id)
+      if (updatedCard) {
+        setSelectedCard(updatedCard)
+      }
+    }
+  }, [cards, selectedCard])
+
+  const handleOpenCardDetail = (card: Card) => {
+    setSelectedCard(card)
+  }
+
+  const handleCloseCardDetail = () => {
+    setSelectedCard(null)
+    resetUpdateError()
+  }
+
+  const handleUpdateCard = async (data: UpdateCardInput) => {
+    if (!selectedCard) return
+    await updateCardAsync({ cardId: selectedCard.id, data })
+  }
+
+  const handleDeleteCard = async () => {
+    if (!selectedCard) return
+    await deleteCardAsync(selectedCard.id)
+    setSelectedCard(null)
+  }
 
   const { setNodeRef: setDroppableRef, isOver } = useDroppable({
     id: `droppable-${list.id}`,
@@ -200,6 +236,7 @@ export default function ListCard({
                       updateCard({ cardId: card.id, data: { title: newTitle } })
                     }
                     onDelete={() => deleteCard(card.id)}
+                    onOpenDetail={() => handleOpenCardDetail(card)}
                     isUpdating={isUpdatingCard}
                     isDeleting={isDeletingCard}
                   />
@@ -241,6 +278,21 @@ export default function ListCard({
         >
           <CreateIcon size={14} /> Add a card
         </Button>
+      )}
+
+      {/* Card Detail Modal */}
+      {selectedCard && (
+        <CardDetailModal
+          card={selectedCard}
+          isOpen={!!selectedCard}
+          onClose={handleCloseCardDetail}
+          onUpdate={handleUpdateCard}
+          onDelete={handleDeleteCard}
+          isUpdating={isUpdatingCard}
+          isDeleting={isDeletingCard}
+          updateError={updateError}
+          resetUpdateError={resetUpdateError}
+        />
       )}
     </div>
   )

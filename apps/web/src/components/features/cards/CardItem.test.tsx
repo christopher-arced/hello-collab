@@ -35,6 +35,7 @@ const mockCard: Card = {
 describe('CardItem', () => {
   const mockOnUpdateTitle = vi.fn()
   const mockOnDelete = vi.fn()
+  const mockOnOpenDetail = vi.fn()
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -172,8 +173,8 @@ describe('CardItem', () => {
     })
   })
 
-  describe('editing', () => {
-    it('enters edit mode when clicking on title', async () => {
+  describe('opening detail modal', () => {
+    it('calls onOpenDetail when clicking on title', async () => {
       const user = userEvent.setup()
       render(
         <CardItem
@@ -181,10 +182,31 @@ describe('CardItem', () => {
           listId={mockCard.listId}
           onUpdateTitle={mockOnUpdateTitle}
           onDelete={mockOnDelete}
+          onOpenDetail={mockOnOpenDetail}
         />
       )
 
       await user.click(screen.getByText('Test Card'))
+
+      expect(mockOnOpenDetail).toHaveBeenCalled()
+    })
+  })
+
+  describe('editing', () => {
+    it('enters edit mode when clicking Edit title in menu', async () => {
+      const user = userEvent.setup()
+      render(
+        <CardItem
+          card={mockCard}
+          listId={mockCard.listId}
+          onUpdateTitle={mockOnUpdateTitle}
+          onDelete={mockOnDelete}
+          onOpenDetail={mockOnOpenDetail}
+        />
+      )
+
+      await user.click(screen.getByRole('button', { name: 'Card options' }))
+      await user.click(screen.getByText('Edit title'))
 
       expect(screen.getByRole('textbox')).toBeInTheDocument()
       expect(screen.getByRole('textbox')).toHaveValue('Test Card')
@@ -198,10 +220,12 @@ describe('CardItem', () => {
           listId={mockCard.listId}
           onUpdateTitle={mockOnUpdateTitle}
           onDelete={mockOnDelete}
+          onOpenDetail={mockOnOpenDetail}
         />
       )
 
-      await user.click(screen.getByText('Test Card'))
+      await user.click(screen.getByRole('button', { name: 'Card options' }))
+      await user.click(screen.getByText('Edit title'))
       const textarea = screen.getByRole('textbox')
       await user.clear(textarea)
       await user.type(textarea, 'Updated Title{Enter}')
@@ -217,10 +241,12 @@ describe('CardItem', () => {
           listId={mockCard.listId}
           onUpdateTitle={mockOnUpdateTitle}
           onDelete={mockOnDelete}
+          onOpenDetail={mockOnOpenDetail}
         />
       )
 
-      await user.click(screen.getByText('Test Card'))
+      await user.click(screen.getByRole('button', { name: 'Card options' }))
+      await user.click(screen.getByText('Edit title'))
       const textarea = screen.getByRole('textbox')
       await user.type(textarea, '{Enter}')
 
@@ -235,10 +261,12 @@ describe('CardItem', () => {
           listId={mockCard.listId}
           onUpdateTitle={mockOnUpdateTitle}
           onDelete={mockOnDelete}
+          onOpenDetail={mockOnOpenDetail}
         />
       )
 
-      await user.click(screen.getByText('Test Card'))
+      await user.click(screen.getByRole('button', { name: 'Card options' }))
+      await user.click(screen.getByText('Edit title'))
       const textarea = screen.getByRole('textbox')
       await user.clear(textarea)
       await user.type(textarea, 'Changed Title{Escape}')
@@ -255,10 +283,12 @@ describe('CardItem', () => {
           listId={mockCard.listId}
           onUpdateTitle={mockOnUpdateTitle}
           onDelete={mockOnDelete}
+          onOpenDetail={mockOnOpenDetail}
         />
       )
 
-      await user.click(screen.getByText('Test Card'))
+      await user.click(screen.getByRole('button', { name: 'Card options' }))
+      await user.click(screen.getByText('Edit title'))
       const textarea = screen.getByRole('textbox')
       await user.clear(textarea)
       await user.type(textarea, 'Changed Title')
@@ -278,10 +308,12 @@ describe('CardItem', () => {
           listId={mockCard.listId}
           onUpdateTitle={mockOnUpdateTitle}
           onDelete={mockOnDelete}
+          onOpenDetail={mockOnOpenDetail}
         />
       )
 
-      await user.click(screen.getByText('Test Card'))
+      await user.click(screen.getByRole('button', { name: 'Card options' }))
+      await user.click(screen.getByText('Edit title'))
       const textarea = screen.getByRole('textbox')
       await user.clear(textarea)
       await user.type(textarea, '  Trimmed Title  {Enter}')
@@ -297,10 +329,12 @@ describe('CardItem', () => {
           listId={mockCard.listId}
           onUpdateTitle={mockOnUpdateTitle}
           onDelete={mockOnDelete}
+          onOpenDetail={mockOnOpenDetail}
         />
       )
 
-      await user.click(screen.getByText('Test Card'))
+      await user.click(screen.getByRole('button', { name: 'Card options' }))
+      await user.click(screen.getByText('Edit title'))
       const textarea = screen.getByRole('textbox')
       await user.clear(textarea)
       await user.type(textarea, '{Enter}')
@@ -310,7 +344,7 @@ describe('CardItem', () => {
   })
 
   describe('deleting', () => {
-    it('renders dropdown menu with delete option', async () => {
+    it('renders dropdown menu with edit and delete options', async () => {
       const user = userEvent.setup()
       render(
         <CardItem
@@ -318,11 +352,13 @@ describe('CardItem', () => {
           listId={mockCard.listId}
           onUpdateTitle={mockOnUpdateTitle}
           onDelete={mockOnDelete}
+          onOpenDetail={mockOnOpenDetail}
         />
       )
 
       await user.click(screen.getByRole('button', { name: 'Card options' }))
 
+      expect(screen.getByText('Edit title')).toBeInTheDocument()
       expect(screen.getByText('Delete card')).toBeInTheDocument()
     })
 
@@ -370,11 +406,13 @@ describe('CardItem', () => {
           listId={mockCard.listId}
           onUpdateTitle={mockOnUpdateTitle}
           onDelete={mockOnDelete}
+          onOpenDetail={mockOnOpenDetail}
           isUpdating={true}
         />
       )
 
-      await user.click(screen.getByText('Test Card'))
+      await user.click(screen.getByRole('button', { name: 'Card options' }))
+      await user.click(screen.getByText('Edit title'))
       const textarea = screen.getByRole('textbox')
 
       expect(textarea).toBeDisabled()

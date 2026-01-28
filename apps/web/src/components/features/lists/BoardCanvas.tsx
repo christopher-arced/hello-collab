@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { List, Card } from '@hello/types'
 import {
   DndContext,
@@ -52,12 +52,19 @@ export default function BoardCanvas({
   isUpdating,
   isDeleting,
 }: BoardCanvasProps) {
+  // Local state for immediate optimistic updates during drag
+  const [localLists, setLocalLists] = useState<List[]>(lists)
   const [activeId, setActiveId] = useState<string | null>(null)
   const [activeType, setActiveType] = useState<'list' | 'card' | null>(null)
   const [activeCard, setActiveCard] = useState<Card | null>(null)
   const [activeListId, setActiveListId] = useState<string | null>(null)
   const [overCardId, setOverCardId] = useState<string | null>(null)
   const [overListId, setOverListId] = useState<string | null>(null)
+
+  // Sync local state when prop changes (from query cache updates)
+  useEffect(() => {
+    setLocalLists(lists)
+  }, [lists])
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -184,10 +191,12 @@ export default function BoardCanvas({
     const overId = over.id as string
 
     if (activeData?.type === 'list') {
-      const oldIndex = lists.findIndex((l) => l.id === active.id)
-      const newIndex = lists.findIndex((l) => l.id === over.id)
+      const oldIndex = localLists.findIndex((l) => l.id === active.id)
+      const newIndex = localLists.findIndex((l) => l.id === over.id)
       if (oldIndex !== -1 && newIndex !== -1) {
-        const newOrder = arrayMove(lists, oldIndex, newIndex)
+        const newOrder = arrayMove(localLists, oldIndex, newIndex)
+        // Immediately update local state for instant visual feedback
+        setLocalLists(newOrder)
         onReorderLists?.(newOrder.map((l) => l.id))
       }
     } else if (activeData?.type === 'card') {
@@ -233,7 +242,7 @@ export default function BoardCanvas({
     }
   }
 
-  const activeList = activeType === 'list' ? lists.find((l) => l.id === activeId) : null
+  const activeList = activeType === 'list' ? localLists.find((l) => l.id === activeId) : null
 
   return (
     <DndContext
@@ -260,10 +269,10 @@ export default function BoardCanvas({
           ) : (
             <>
               <SortableContext
-                items={lists.map((l) => l.id)}
+                items={localLists.map((l) => l.id)}
                 strategy={horizontalListSortingStrategy}
               >
-                {lists.map((list) => (
+                {localLists.map((list) => (
                   <ListCard
                     key={list.id}
                     list={list}

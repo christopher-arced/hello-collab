@@ -10,6 +10,7 @@ export interface CardItemProps {
   listId: string
   onUpdateTitle: (title: string) => void
   onDelete: () => void
+  onOpenDetail?: () => void
   isUpdating?: boolean
   isDeleting?: boolean
 }
@@ -41,6 +42,7 @@ export default function CardItem({
   listId,
   onUpdateTitle,
   onDelete,
+  onOpenDetail,
   isUpdating,
   isDeleting,
 }: CardItemProps) {
@@ -141,7 +143,7 @@ export default function CardItem({
             />
           ) : (
             <p
-              onClick={() => setIsEditing(true)}
+              onClick={() => onOpenDetail?.()}
               className="flex-1 px-0.5 py-0.5 text-sm cursor-pointer rounded hover:bg-black/5 dark:hover:bg-white/5 text-gray-800 dark:text-gray-100 leading-snug break-words select-none"
             >
               {title}
@@ -150,6 +152,10 @@ export default function CardItem({
 
           <DropdownMenu
             items={[
+              {
+                label: 'Edit title',
+                onClick: () => setIsEditing(true),
+              },
               {
                 label: isDeleting ? 'Deleting...' : 'Delete card',
                 onClick: onDelete,
@@ -160,7 +166,6 @@ export default function CardItem({
             triggerSize={14}
             triggerClassName="p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
             ariaLabel="Card options"
-            onMenuOpen={() => setIsEditing(true)}
           />
         </div>
 

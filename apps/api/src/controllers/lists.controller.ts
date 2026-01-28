@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express'
-import type { CreateListInput, UpdateListInput, ReorderListsInput } from '@hello/validation'
+import { createListSchema, updateListSchema, reorderListsSchema } from '@hello/validation'
 import type { ApiResponse, List } from '@hello/types'
 import {
   createList,
@@ -8,6 +8,12 @@ import {
   deleteList,
   reorderLists,
 } from '../services/lists.service'
+import {
+  emitListCreated,
+  emitListUpdated,
+  emitListDeleted,
+  emitListsReordered,
+} from '../sockets/emitter'
 
 export async function getByBoard(req: Request, res: Response) {
   try {
@@ -34,9 +40,17 @@ export async function getByBoard(req: Request, res: Response) {
 export async function create(req: Request, res: Response) {
   try {
     const { boardId } = req.params
-    const data = req.body as CreateListInput
+    const result = createListSchema.safeParse(req.body)
 
-    const list = await createList(boardId, req.user!.id, data)
+    if (!result.success) {
+      return res.status(400).json({
+        success: false,
+        error: 'Validation failed',
+        details: result.error.flatten().fieldErrors as Record<string, string[]>,
+      } satisfies ApiResponse)
+    }
+
+    const list = await createList(boardId, req.user!.id, result.data)
 
     if (!list) {
       return res.status(404).json({
@@ -44,6 +58,9 @@ export async function create(req: Request, res: Response) {
         error: 'Board not found or access denied',
       } satisfies ApiResponse)
     }
+
+    // Emit real-time event
+    emitListCreated(boardId, list, req.user!.id)
 
     return res.status(201).json({
       success: true,
@@ -61,9 +78,17 @@ export async function create(req: Request, res: Response) {
 export async function update(req: Request, res: Response) {
   try {
     const { id } = req.params
-    const data = req.body as UpdateListInput
+    const result = updateListSchema.safeParse(req.body)
 
-    const list = await updateList(id, req.user!.id, data)
+    if (!result.success) {
+      return res.status(400).json({
+        success: false,
+        error: 'Validation failed',
+        details: result.error.flatten().fieldErrors as Record<string, string[]>,
+      } satisfies ApiResponse)
+    }
+
+    const list = await updateList(id, req.user!.id, result.data)
 
     if (!list) {
       return res.status(404).json({
@@ -71,6 +96,9 @@ export async function update(req: Request, res: Response) {
         error: 'List not found or access denied',
       } satisfies ApiResponse)
     }
+
+    // Emit real-time event
+    emitListUpdated(list.boardId, list, req.user!.id)
 
     return res.json({ success: true, data: list } satisfies ApiResponse<List>)
   } catch (error) {
@@ -85,14 +113,17 @@ export async function update(req: Request, res: Response) {
 export async function remove(req: Request, res: Response) {
   try {
     const { id } = req.params
-    const deleted = await deleteList(id, req.user!.id)
+    const { deleted, boardId } = await deleteList(id, req.user!.id)
 
-    if (!deleted) {
+    if (!deleted || !boardId) {
       return res.status(404).json({
         success: false,
         error: 'List not found or access denied',
       } satisfies ApiResponse)
     }
+
+    // Emit real-time event
+    emitListDeleted(boardId, id, req.user!.id)
 
     return res.json({ success: true, data: null } satisfies ApiResponse<null>)
   } catch (error) {
@@ -107,9 +138,17 @@ export async function remove(req: Request, res: Response) {
 export async function reorder(req: Request, res: Response) {
   try {
     const { boardId } = req.params
-    const data = req.body as ReorderListsInput
+    const result = reorderListsSchema.safeParse(req.body)
 
-    const lists = await reorderLists(boardId, req.user!.id, data)
+    if (!result.success) {
+      return res.status(400).json({
+        success: false,
+        error: 'Validation failed',
+        details: result.error.flatten().fieldErrors as Record<string, string[]>,
+      } satisfies ApiResponse)
+    }
+
+    const lists = await reorderLists(boardId, req.user!.id, result.data)
 
     if (!lists) {
       return res.status(404).json({
@@ -117,6 +156,9 @@ export async function reorder(req: Request, res: Response) {
         error: 'Board not found, access denied, or invalid list IDs',
       } satisfies ApiResponse)
     }
+
+    // Emit real-time event
+    emitListsReordered(boardId, lists, req.user!.id)
 
     return res.json({ success: true, data: lists } satisfies ApiResponse<List[]>)
   } catch (error) {

@@ -23,6 +23,8 @@ export function useCards(listId: string) {
     queryKey: CARD_KEYS.byList(listId),
     queryFn: () => fetcher<Card[]>(`/api/lists/${listId}/cards`),
     enabled: !!listId,
+    // Data is pre-populated by useBoard, keep it fresh for 30 seconds
+    staleTime: 30 * 1000,
   })
 
   const createMutation = useMutation({
@@ -51,9 +53,17 @@ export function useCards(listId: string) {
       return { previous, tempId: tempCard.id }
     },
     onSuccess: (newCard, _, context) => {
-      queryClient.setQueryData<Card[]>(CARD_KEYS.byList(listId), (old) =>
-        old ? old.map((c) => (c.id === context?.tempId ? newCard : c)) : [newCard]
-      )
+      queryClient.setQueryData<Card[]>(CARD_KEYS.byList(listId), (old) => {
+        if (!old) return [newCard]
+        // Check if socket event already added this card
+        const exists = old.some((c) => c.id === newCard.id)
+        if (exists) {
+          // Remove the temp card, keep the socket-added one
+          return old.filter((c) => c.id !== context?.tempId)
+        }
+        // Replace temp card with real card
+        return old.map((c) => (c.id === context?.tempId ? newCard : c))
+      })
     },
     onError: (_, __, context) => {
       if (context?.previous) {

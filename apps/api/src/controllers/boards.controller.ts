@@ -8,6 +8,7 @@ import {
   updateBoard,
   deleteBoard,
 } from '../services/boards.service'
+import { emitBoardUpdated, emitBoardDeleted } from '../sockets/emitter'
 
 export async function getBoards(req: Request, res: Response) {
   try {
@@ -94,6 +95,9 @@ export async function update(req: Request, res: Response) {
       } satisfies ApiResponse)
     }
 
+    // Emit real-time event
+    emitBoardUpdated(id, board, req.user!.id)
+
     return res.json({ success: true, data: board } satisfies ApiResponse<Board>)
   } catch (error) {
     console.error('Update board error:', error)
@@ -115,6 +119,9 @@ export async function remove(req: Request, res: Response) {
         error: 'Board not found or access denied',
       } satisfies ApiResponse)
     }
+
+    // Emit real-time event
+    emitBoardDeleted(id, req.user!.id)
 
     return res.json({ success: true, data: null } satisfies ApiResponse<null>)
   } catch (error) {
