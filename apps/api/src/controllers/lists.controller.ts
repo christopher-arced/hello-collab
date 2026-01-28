@@ -8,6 +8,12 @@ import {
   deleteList,
   reorderLists,
 } from '../services/lists.service'
+import {
+  emitListCreated,
+  emitListUpdated,
+  emitListDeleted,
+  emitListsReordered,
+} from '../sockets/emitter'
 
 export async function getByBoard(req: Request, res: Response) {
   try {
@@ -53,6 +59,9 @@ export async function create(req: Request, res: Response) {
       } satisfies ApiResponse)
     }
 
+    // Emit real-time event
+    emitListCreated(boardId, list, req.user!.id)
+
     return res.status(201).json({
       success: true,
       data: list,
@@ -88,6 +97,9 @@ export async function update(req: Request, res: Response) {
       } satisfies ApiResponse)
     }
 
+    // Emit real-time event
+    emitListUpdated(list.boardId, list, req.user!.id)
+
     return res.json({ success: true, data: list } satisfies ApiResponse<List>)
   } catch (error) {
     console.error('Update list error:', error)
@@ -101,14 +113,17 @@ export async function update(req: Request, res: Response) {
 export async function remove(req: Request, res: Response) {
   try {
     const { id } = req.params
-    const deleted = await deleteList(id, req.user!.id)
+    const { deleted, boardId } = await deleteList(id, req.user!.id)
 
-    if (!deleted) {
+    if (!deleted || !boardId) {
       return res.status(404).json({
         success: false,
         error: 'List not found or access denied',
       } satisfies ApiResponse)
     }
+
+    // Emit real-time event
+    emitListDeleted(boardId, id, req.user!.id)
 
     return res.json({ success: true, data: null } satisfies ApiResponse<null>)
   } catch (error) {
@@ -141,6 +156,9 @@ export async function reorder(req: Request, res: Response) {
         error: 'Board not found, access denied, or invalid list IDs',
       } satisfies ApiResponse)
     }
+
+    // Emit real-time event
+    emitListsReordered(boardId, lists, req.user!.id)
 
     return res.json({ success: true, data: lists } satisfies ApiResponse<List[]>)
   } catch (error) {

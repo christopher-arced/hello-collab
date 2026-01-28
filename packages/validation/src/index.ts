@@ -82,7 +82,13 @@ export const updateCardSchema = z.object({
   title: z.string().min(1).max(512).optional(),
   description: z.string().max(5000).optional().nullable(),
   dueDate: z.string().datetime().or(z.null()).optional(),
-  coverUrl: z.string().url().optional().nullable(),
+  coverUrl: z
+    .string()
+    .url()
+    .or(z.literal(''))
+    .transform((val) => (val === '' ? null : val))
+    .optional()
+    .nullable(),
 })
 
 export const moveCardSchema = z.object({

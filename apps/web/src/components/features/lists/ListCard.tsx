@@ -1,8 +1,12 @@
 import { useState, useRef, useEffect } from 'react'
-import type { List } from '@hello/types'
-import { CreateIcon } from '../../icons'
+import type { List, Card } from '@hello/types'
+import type { UpdateCardInput } from '@hello/validation'
+import { useDroppable, useDndContext } from '@dnd-kit/core'
+import { useSortable, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+import { CreateIcon, DragIcon } from '../../icons'
 import { useCards } from '../../../hooks/useCards'
-import { CardItem, AddCardForm } from '../cards'
+import { CardItem, AddCardForm, CardDetailModal } from '../cards'
 import { Button, DropdownMenu } from '@/components/common'
 
 export interface ListCardProps {
@@ -11,6 +15,7 @@ export interface ListCardProps {
   onDelete: () => void
   isUpdating?: boolean
   isDeleting?: boolean
+  dropIndicatorCardId?: string | null
 }
 
 export default function ListCard({
@@ -19,13 +24,25 @@ export default function ListCard({
   onDelete,
   isUpdating,
   isDeleting,
+  dropIndicatorCardId,
 }: ListCardProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [title, setTitle] = useState(list.title)
   const [isAddCardOpen, setIsAddCardOpen] = useState(false)
+  const [selectedCard, setSelectedCard] = useState<Card | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const addCardFormRef = useRef<HTMLDivElement>(null)
+
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: list.id,
+    data: { type: 'list', list },
+  })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  }
 
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -41,10 +58,59 @@ export default function ListCard({
     createCardAsync,
     isCreating: isCreatingCard,
     updateCard,
+    updateCardAsync,
     isUpdating: isUpdatingCard,
+    updateError,
+    resetUpdateError,
     deleteCard,
+    deleteCardAsync,
     isDeleting: isDeletingCard,
   } = useCards(list.id)
+
+  // Keep selected card in sync with cards data (for real-time updates)
+  useEffect(() => {
+    if (selectedCard) {
+      const updatedCard = cards.find((c) => c.id === selectedCard.id)
+      if (updatedCard) {
+        setSelectedCard(updatedCard)
+      }
+    }
+  }, [cards, selectedCard])
+
+  const handleOpenCardDetail = (card: Card) => {
+    setSelectedCard(card)
+  }
+
+  const handleCloseCardDetail = () => {
+    setSelectedCard(null)
+    resetUpdateError()
+  }
+
+  const handleUpdateCard = async (data: UpdateCardInput) => {
+    if (!selectedCard) return
+    await updateCardAsync({ cardId: selectedCard.id, data })
+  }
+
+  const handleDeleteCard = async () => {
+    if (!selectedCard) return
+    await deleteCardAsync(selectedCard.id)
+    setSelectedCard(null)
+  }
+
+  const { setNodeRef: setDroppableRef, isOver } = useDroppable({
+    id: `droppable-${list.id}`,
+    data: { type: 'list', listId: list.id },
+  })
+
+  const { setNodeRef: setEndDroppableRef, isOver: isOverEnd } = useDroppable({
+    id: `droppable-end-${list.id}`,
+    data: { type: 'list-end', listId: list.id, position: cards.length },
+  })
+
+  const { active } = useDndContext()
+  const activeData = active?.data.current as { type?: 'list' | 'card'; listId?: string } | undefined
+  const isCardOver = isOver && activeData?.type === 'card'
+  const isCardOverEnd = isOverEnd && activeData?.type === 'card' && activeData.listId !== list.id
 
   useEffect(() => {
     setTitle(list.title)
@@ -76,9 +142,31 @@ export default function ListCard({
     }
   }
 
+  if (isDragging) {
+    return (
+      <div
+        ref={setNodeRef}
+        style={style}
+        className="w-72 flex-shrink-0 h-32 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-600 bg-gray-100/50 dark:bg-gray-800/50"
+      />
+    )
+  }
+
   return (
-    <div className="w-72 flex-shrink-0 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700/50 flex flex-col max-h-full">
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="w-72 flex-shrink-0 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700/50 flex flex-col max-h-full"
+    >
       <div className="px-4 py-3 flex items-center justify-between">
+        <button
+          type="button"
+          className="cursor-grab active:cursor-grabbing p-1 -ml-1 mr-1 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 touch-none"
+          {...attributes}
+          {...listeners}
+        >
+          <DragIcon size={16} />
+        </button>
         {isEditing ? (
           <input
             ref={inputRef}
@@ -123,35 +211,59 @@ export default function ListCard({
             Loading...
           </div>
         ) : cards.length === 0 && !isAddCardOpen ? (
-          <div className="text-center py-6 text-sm text-gray-400 dark:text-gray-500">
-            No cards yet
+          <div
+            ref={setDroppableRef}
+            className={`text-center py-6 text-sm rounded-lg transition-colors ${
+              isCardOver
+                ? 'bg-blue-50 dark:bg-blue-900/20 border-2 border-dashed border-blue-300 dark:border-blue-600 text-blue-500'
+                : 'text-gray-400 dark:text-gray-500'
+            }`}
+          >
+            {isCardOver ? 'Drop card here' : 'No cards yet'}
           </div>
         ) : (
-          <div className="space-y-2">
-            {cards.map((card) => (
-              <CardItem
-                key={card.id}
-                card={card}
-                onUpdateTitle={(newTitle) =>
-                  updateCard({ cardId: card.id, data: { title: newTitle } })
-                }
-                onDelete={() => deleteCard(card.id)}
-                isUpdating={isUpdatingCard}
-                isDeleting={isDeletingCard}
-              />
-            ))}
-            <div ref={addCardFormRef}>
-              {isAddCardOpen && (
-                <AddCardForm
-                  onAdd={async (cardTitle) => {
-                    await createCardAsync({ title: cardTitle })
-                  }}
-                  isOpen={isAddCardOpen}
-                  onOpenChange={setIsAddCardOpen}
+          <SortableContext items={cards.map((c) => c.id)} strategy={verticalListSortingStrategy}>
+            <div className="space-y-2">
+              {cards.map((card) => (
+                <div key={card.id}>
+                  {dropIndicatorCardId === card.id && (
+                    <div className="h-1 bg-blue-500 rounded-full mb-2" />
+                  )}
+                  <CardItem
+                    card={card}
+                    listId={list.id}
+                    onUpdateTitle={(newTitle) =>
+                      updateCard({ cardId: card.id, data: { title: newTitle } })
+                    }
+                    onDelete={() => deleteCard(card.id)}
+                    onOpenDetail={() => handleOpenCardDetail(card)}
+                    isUpdating={isUpdatingCard}
+                    isDeleting={isDeletingCard}
+                  />
+                </div>
+              ))}
+              {/* End drop zone for dropping at the last position - only show when dragging a card from another list */}
+              {activeData?.type === 'card' && activeData.listId !== list.id && (
+                <div
+                  ref={setEndDroppableRef}
+                  className={`min-h-[8px] rounded transition-all ${
+                    isCardOverEnd ? 'h-1 bg-blue-500 my-1' : ''
+                  }`}
                 />
               )}
+              <div ref={addCardFormRef}>
+                {isAddCardOpen && (
+                  <AddCardForm
+                    onAdd={async (cardTitle) => {
+                      await createCardAsync({ title: cardTitle })
+                    }}
+                    isOpen={isAddCardOpen}
+                    onOpenChange={setIsAddCardOpen}
+                  />
+                )}
+              </div>
             </div>
-          </div>
+          </SortableContext>
         )}
       </div>
 
@@ -166,6 +278,21 @@ export default function ListCard({
         >
           <CreateIcon size={14} /> Add a card
         </Button>
+      )}
+
+      {/* Card Detail Modal */}
+      {selectedCard && (
+        <CardDetailModal
+          card={selectedCard}
+          isOpen={!!selectedCard}
+          onClose={handleCloseCardDetail}
+          onUpdate={handleUpdateCard}
+          onDelete={handleDeleteCard}
+          isUpdating={isUpdatingCard}
+          isDeleting={isDeletingCard}
+          updateError={updateError}
+          resetUpdateError={resetUpdateError}
+        />
       )}
     </div>
   )

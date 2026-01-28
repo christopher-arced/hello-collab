@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { registerSchema } from '@hello/validation'
-import { Input, Button, Checkbox } from '../../common'
+import { Input, Button, Checkbox, ErrorAlert } from '../../common'
 import { UserIcon, EmailIcon, LockIcon, KeyIcon, EyeIcon, EyeOffIcon } from '../../icons'
 import { useAuth } from '../../../hooks/useAuth'
 
@@ -80,11 +80,7 @@ const RegisterForm = () => {
         Create your account
       </h2>
 
-      {registerError && (
-        <div role="alert" className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
-          <p className="text-sm text-red-400">{registerError.message}</p>
-        </div>
-      )}
+      {registerError && <ErrorAlert message={registerError.message} />}
 
       <form noValidate onSubmit={handleSubmit(onSubmit)}>
         <div className="mb-[18px]">

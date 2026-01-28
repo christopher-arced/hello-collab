@@ -347,7 +347,7 @@ describe('DELETE /api/lists/:id', () => {
   })
 
   it('should delete list and return 200', async () => {
-    vi.mocked(listsService.deleteList).mockResolvedValue(true)
+    vi.mocked(listsService.deleteList).mockResolvedValue({ deleted: true, boardId: 'board-123' })
 
     const response = await request(app)
       .delete('/api/lists/list-123')
@@ -361,7 +361,7 @@ describe('DELETE /api/lists/:id', () => {
   })
 
   it('should return 404 when list not found or access denied', async () => {
-    vi.mocked(listsService.deleteList).mockResolvedValue(false)
+    vi.mocked(listsService.deleteList).mockResolvedValue({ deleted: false, boardId: null })
 
     const response = await request(app)
       .delete('/api/lists/nonexistent')

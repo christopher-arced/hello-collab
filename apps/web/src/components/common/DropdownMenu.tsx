@@ -78,9 +78,9 @@ export default function DropdownMenu({
           className={`fixed ${menuWidth} rounded-lg z-50 overflow-hidden bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-lg`}
           style={{ top: position.top, left: position.left }}
         >
-          {items.map((item, index) => (
+          {items.map((item) => (
             <button
-              key={index}
+              key={item.label}
               onClick={() => {
                 setIsOpen(false)
                 item.onClick()

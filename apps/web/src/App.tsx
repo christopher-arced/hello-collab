@@ -7,6 +7,8 @@ import BoardPage from './pages/BoardPage'
 import { ProtectedRoute } from './components/routing/ProtectedRoute'
 import { GuestRoute } from './components/routing/GuestRoute'
 import { ThemeProvider } from './components/providers/ThemeProvider'
+import { SocketProvider } from './contexts/SocketContext'
+import { ErrorBoundary } from './components/common'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -20,45 +22,49 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <DashboardPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/board/:id"
-              element={
-                <ProtectedRoute>
-                  <BoardPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/register"
-              element={
-                <GuestRoute>
-                  <RegisterPage />
-                </GuestRoute>
-              }
-            />
-            <Route
-              path="/login"
-              element={
-                <GuestRoute>
-                  <LoginPage />
-                </GuestRoute>
-              }
-            />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </BrowserRouter>
-      </ThemeProvider>
+      <SocketProvider>
+        <ThemeProvider>
+          <ErrorBoundary>
+            <BrowserRouter>
+              <Routes>
+                <Route
+                  path="/"
+                  element={
+                    <ProtectedRoute>
+                      <DashboardPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/board/:id"
+                  element={
+                    <ProtectedRoute>
+                      <BoardPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/register"
+                  element={
+                    <GuestRoute>
+                      <RegisterPage />
+                    </GuestRoute>
+                  }
+                />
+                <Route
+                  path="/login"
+                  element={
+                    <GuestRoute>
+                      <LoginPage />
+                    </GuestRoute>
+                  }
+                />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </BrowserRouter>
+          </ErrorBoundary>
+        </ThemeProvider>
+      </SocketProvider>
     </QueryClientProvider>
   )
 }
