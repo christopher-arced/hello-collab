@@ -115,6 +115,15 @@ export const idParamSchema = z.object({
   id: z.string().min(1, 'ID is required'),
 })
 
+// Socket Event Schemas
+export const joinBoardPayloadSchema = z.object({
+  boardId: z.string().min(1, 'Board ID is required'),
+})
+
+export const leaveBoardPayloadSchema = z.object({
+  boardId: z.string().min(1, 'Board ID is required'),
+})
+
 export const paginationSchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(100).default(20),
@@ -143,3 +152,6 @@ export type AddBoardMemberInput = z.infer<typeof addBoardMemberSchema>
 export type UpdateBoardMemberInput = z.infer<typeof updateBoardMemberSchema>
 
 export type PaginationInput = z.infer<typeof paginationSchema>
+
+export type JoinBoardPayload = z.infer<typeof joinBoardPayloadSchema>
+export type LeaveBoardPayload = z.infer<typeof leaveBoardPayloadSchema>
