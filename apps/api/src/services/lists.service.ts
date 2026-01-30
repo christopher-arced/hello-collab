@@ -1,6 +1,7 @@
 import { prisma } from '@hello/database'
 import type { CreateListInput, UpdateListInput, ReorderListsInput } from '@hello/validation'
 import type { List } from '@hello/types'
+import { hasBoardAccess } from '../utils/boardAccess'
 
 const listSelect = {
   id: true,
@@ -11,28 +12,8 @@ const listSelect = {
   updatedAt: true,
 } as const
 
-async function verifyBoardAccess(
-  boardId: string,
-  userId: string,
-  requireEditor = false
-): Promise<boolean> {
-  const board = await prisma.board.findFirst({
-    where: {
-      id: boardId,
-      OR: requireEditor
-        ? [
-            { ownerId: userId },
-            { members: { some: { userId, role: { in: ['OWNER', 'EDITOR'] } } } },
-          ]
-        : [{ ownerId: userId }, { members: { some: { userId } } }],
-    },
-    select: { id: true },
-  })
-  return !!board
-}
-
 export async function getListsByBoard(boardId: string, userId: string): Promise<List[] | null> {
-  const hasAccess = await verifyBoardAccess(boardId, userId)
+  const hasAccess = await hasBoardAccess(boardId, userId)
   if (!hasAccess) return null
 
   return prisma.list.findMany({
@@ -47,7 +28,7 @@ export async function createList(
   userId: string,
   data: CreateListInput
 ): Promise<List | null> {
-  const hasAccess = await verifyBoardAccess(boardId, userId, true)
+  const hasAccess = await hasBoardAccess(boardId, userId, true)
   if (!hasAccess) return null
 
   return prisma.$transaction(async (tx) => {
@@ -81,7 +62,7 @@ export async function updateList(
 
   if (!list) return null
 
-  const hasAccess = await verifyBoardAccess(list.boardId, userId, true)
+  const hasAccess = await hasBoardAccess(list.boardId, userId, true)
   if (!hasAccess) return null
 
   return prisma.list.update({
@@ -94,22 +75,25 @@ export async function updateList(
   })
 }
 
-export async function deleteList(listId: string, userId: string): Promise<boolean> {
+export async function deleteList(
+  listId: string,
+  userId: string
+): Promise<{ deleted: boolean; boardId: string | null }> {
   const list = await prisma.list.findUnique({
     where: { id: listId },
     select: { boardId: true },
   })
 
-  if (!list) return false
+  if (!list) return { deleted: false, boardId: null }
 
-  const hasAccess = await verifyBoardAccess(list.boardId, userId, true)
-  if (!hasAccess) return false
+  const hasAccess = await hasBoardAccess(list.boardId, userId, true)
+  if (!hasAccess) return { deleted: false, boardId: null }
 
   await prisma.list.delete({
     where: { id: listId },
   })
 
-  return true
+  return { deleted: true, boardId: list.boardId }
 }
 
 export async function reorderLists(
@@ -117,7 +101,7 @@ export async function reorderLists(
   userId: string,
   data: ReorderListsInput
 ): Promise<List[] | null> {
-  const hasAccess = await verifyBoardAccess(boardId, userId, true)
+  const hasAccess = await hasBoardAccess(boardId, userId, true)
   if (!hasAccess) return null
 
   return prisma.$transaction(async (tx) => {

@@ -3,6 +3,7 @@ import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import authRoutes from './routes/auth'
 import boardsRoutes from './routes/boards'
+import boardMembersRoutes from './routes/boardMembers'
 import listsRoutes from './routes/lists'
 import cardsRoutes from './routes/cards'
 
@@ -29,6 +30,7 @@ export function createApp() {
 
   app.use('/api/auth', authRoutes)
   app.use('/api/boards', boardsRoutes)
+  app.use('/api/boards', boardMembersRoutes)
   app.use('/api', listsRoutes)
   app.use('/api', cardsRoutes)
 

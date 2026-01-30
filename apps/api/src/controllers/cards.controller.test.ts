@@ -142,7 +142,7 @@ describe('POST /api/lists/:listId/cards', () => {
 
   describe('with valid data', () => {
     it('should create a card and return 201', async () => {
-      vi.mocked(cardsService.createCard).mockResolvedValue(mockCard)
+      vi.mocked(cardsService.createCard).mockResolvedValue({ card: mockCard, boardId: 'board-123' })
 
       const response = await request(app)
         .post('/api/lists/list-123/cards')
@@ -161,7 +161,10 @@ describe('POST /api/lists/:listId/cards', () => {
 
     it('should create a card with description', async () => {
       const cardWithDescription = { ...mockCard, description: 'A description' }
-      vi.mocked(cardsService.createCard).mockResolvedValue(cardWithDescription)
+      vi.mocked(cardsService.createCard).mockResolvedValue({
+        card: cardWithDescription,
+        boardId: 'board-123',
+      })
 
       const response = await request(app)
         .post('/api/lists/list-123/cards')
@@ -176,7 +179,10 @@ describe('POST /api/lists/:listId/cards', () => {
     })
 
     it('should create a card with position', async () => {
-      vi.mocked(cardsService.createCard).mockResolvedValue({ ...mockCard, position: 5 })
+      vi.mocked(cardsService.createCard).mockResolvedValue({
+        card: { ...mockCard, position: 5 },
+        boardId: 'board-123',
+      })
 
       const response = await request(app)
         .post('/api/lists/list-123/cards')
@@ -278,7 +284,10 @@ describe('PATCH /api/cards/:id', () => {
   describe('with valid data', () => {
     it('should update card title and return 200', async () => {
       const updatedCard = { ...mockCard, title: 'Updated Title' }
-      vi.mocked(cardsService.updateCard).mockResolvedValue(updatedCard)
+      vi.mocked(cardsService.updateCard).mockResolvedValue({
+        card: updatedCard,
+        boardId: 'board-123',
+      })
 
       const response = await request(app)
         .patch('/api/cards/card-123')
@@ -294,7 +303,10 @@ describe('PATCH /api/cards/:id', () => {
 
     it('should update card description', async () => {
       const updatedCard = { ...mockCard, description: 'New description' }
-      vi.mocked(cardsService.updateCard).mockResolvedValue(updatedCard)
+      vi.mocked(cardsService.updateCard).mockResolvedValue({
+        card: updatedCard,
+        boardId: 'board-123',
+      })
 
       const response = await request(app)
         .patch('/api/cards/card-123')
@@ -308,7 +320,10 @@ describe('PATCH /api/cards/:id', () => {
     it('should update card dueDate', async () => {
       const dueDate = '2025-12-31T00:00:00.000Z'
       const updatedCard = { ...mockCard, dueDate: new Date(dueDate) }
-      vi.mocked(cardsService.updateCard).mockResolvedValue(updatedCard)
+      vi.mocked(cardsService.updateCard).mockResolvedValue({
+        card: updatedCard,
+        boardId: 'board-123',
+      })
 
       const response = await request(app)
         .patch('/api/cards/card-123')
@@ -320,7 +335,10 @@ describe('PATCH /api/cards/:id', () => {
 
     it('should allow setting description to null', async () => {
       const updatedCard = { ...mockCard, description: null }
-      vi.mocked(cardsService.updateCard).mockResolvedValue(updatedCard)
+      vi.mocked(cardsService.updateCard).mockResolvedValue({
+        card: updatedCard,
+        boardId: 'board-123',
+      })
 
       const response = await request(app)
         .patch('/api/cards/card-123')
@@ -403,7 +421,11 @@ describe('DELETE /api/cards/:id', () => {
   })
 
   it('should delete card and return 200', async () => {
-    vi.mocked(cardsService.deleteCard).mockResolvedValue(true)
+    vi.mocked(cardsService.deleteCard).mockResolvedValue({
+      deleted: true,
+      listId: 'list-123',
+      boardId: 'board-123',
+    })
 
     const response = await request(app)
       .delete('/api/cards/card-123')
@@ -417,7 +439,11 @@ describe('DELETE /api/cards/:id', () => {
   })
 
   it('should return 404 when card not found or access denied', async () => {
-    vi.mocked(cardsService.deleteCard).mockResolvedValue(false)
+    vi.mocked(cardsService.deleteCard).mockResolvedValue({
+      deleted: false,
+      listId: null,
+      boardId: null,
+    })
 
     const response = await request(app)
       .delete('/api/cards/nonexistent')
@@ -453,7 +479,11 @@ describe('PATCH /api/cards/:id/move', () => {
 
   it('should move card to different list and return 200', async () => {
     const movedCard = { ...mockCard, listId: 'list-456', position: 2 }
-    vi.mocked(cardsService.moveCard).mockResolvedValue(movedCard)
+    vi.mocked(cardsService.moveCard).mockResolvedValue({
+      card: movedCard,
+      fromListId: 'list-123',
+      boardId: 'board-123',
+    })
 
     const response = await request(app)
       .patch('/api/cards/card-123/move')
@@ -542,7 +572,10 @@ describe('PATCH /api/lists/:listId/cards/reorder', () => {
       { ...mockCard2, position: 0 },
       { ...mockCard, position: 1 },
     ]
-    vi.mocked(cardsService.reorderCards).mockResolvedValue(reorderedCards)
+    vi.mocked(cardsService.reorderCards).mockResolvedValue({
+      cards: reorderedCards,
+      boardId: 'board-123',
+    })
 
     const response = await request(app)
       .patch('/api/lists/list-123/cards/reorder')

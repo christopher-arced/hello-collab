@@ -138,7 +138,7 @@ describe('cards.service', () => {
 
       const result = await updateCard('card-123', mockUser.id, { title: 'New Title' })
 
-      expect(result?.title).toBe('New Title')
+      expect(result?.card.title).toBe('New Title')
     })
 
     it('should allow edit access for EDITOR role', async () => {
@@ -161,7 +161,7 @@ describe('cards.service', () => {
 
       const result = await updateCard('card-123', mockUser.id, { title: 'New Title' })
 
-      expect(result?.title).toBe('New Title')
+      expect(result?.card.title).toBe('New Title')
     })
 
     it('should deny edit access for VIEWER role', async () => {
@@ -352,7 +352,7 @@ describe('cards.service', () => {
 
       const result = await deleteCard('card-123', mockUser.id)
 
-      expect(result).toBe(false)
+      expect(result).toEqual({ deleted: false, listId: null, boardId: null })
     })
 
     it('should delete card and return true', async () => {
@@ -370,7 +370,7 @@ describe('cards.service', () => {
       expect(prisma.card.delete).toHaveBeenCalledWith({
         where: { id: 'card-123' },
       })
-      expect(result).toBe(true)
+      expect(result).toEqual({ deleted: true, listId: 'list-123', boardId: 'board-123' })
     })
   })
 
@@ -444,7 +444,7 @@ describe('cards.service', () => {
         },
         select: expect.any(Object),
       })
-      expect(result?.listId).toBe('list-456')
+      expect(result?.card.listId).toBe('list-456')
     })
   })
 

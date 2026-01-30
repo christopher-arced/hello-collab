@@ -82,7 +82,13 @@ export const updateCardSchema = z.object({
   title: z.string().min(1).max(512).optional(),
   description: z.string().max(5000).optional().nullable(),
   dueDate: z.string().datetime().or(z.null()).optional(),
-  coverUrl: z.string().url().optional().nullable(),
+  coverUrl: z
+    .string()
+    .url()
+    .or(z.literal(''))
+    .transform((val) => (val === '' ? null : val))
+    .optional()
+    .nullable(),
 })
 
 export const moveCardSchema = z.object({
@@ -107,6 +113,15 @@ export const updateBoardMemberSchema = z.object({
 // Common Schemas
 export const idParamSchema = z.object({
   id: z.string().min(1, 'ID is required'),
+})
+
+// Socket Event Schemas
+export const joinBoardPayloadSchema = z.object({
+  boardId: z.string().min(1, 'Board ID is required'),
+})
+
+export const leaveBoardPayloadSchema = z.object({
+  boardId: z.string().min(1, 'Board ID is required'),
 })
 
 export const paginationSchema = z.object({
@@ -137,3 +152,6 @@ export type AddBoardMemberInput = z.infer<typeof addBoardMemberSchema>
 export type UpdateBoardMemberInput = z.infer<typeof updateBoardMemberSchema>
 
 export type PaginationInput = z.infer<typeof paginationSchema>
+
+export type JoinBoardPayload = z.infer<typeof joinBoardPayloadSchema>
+export type LeaveBoardPayload = z.infer<typeof leaveBoardPayloadSchema>
