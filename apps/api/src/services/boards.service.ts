@@ -34,6 +34,31 @@ export async function findBoardById(boardId: string, userId: string): Promise<Bo
       ownerId: true,
       createdAt: true,
       updatedAt: true,
+      lists: {
+        select: {
+          id: true,
+          title: true,
+          boardId: true,
+          position: true,
+          createdAt: true,
+          updatedAt: true,
+          cards: {
+            select: {
+              id: true,
+              title: true,
+              description: true,
+              listId: true,
+              position: true,
+              dueDate: true,
+              coverUrl: true,
+              createdAt: true,
+              updatedAt: true,
+            },
+            orderBy: { position: 'asc' },
+          },
+        },
+        orderBy: { position: 'asc' },
+      },
     },
   })
 }

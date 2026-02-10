@@ -1,28 +1,14 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createBoardSchema, CreateBoardInput } from '@hello/validation'
-import { Modal, Input, Button } from '../../common'
+import { Modal, Input, Button, ErrorAlert } from '../../common'
 import { useBoards } from '../../../hooks/useBoards'
+import { BOARD_COLORS } from '../../../constants/boardColors'
 
 interface CreateBoardModalProps {
   isOpen: boolean
   onClose: () => void
 }
-
-const BOARD_COLORS = [
-  '#6366f1', // Indigo
-  '#8b5cf6', // Violet
-  '#d946ef', // Fuchsia
-  '#ec4899', // Pink
-  '#f43f5e', // Rose
-  '#ef4444', // Red
-  '#f97316', // Orange
-  '#eab308', // Yellow
-  '#22c55e', // Green
-  '#14b8a6', // Teal
-  '#0ea5e9', // Sky
-  '#0079BF', // Trello Blue (default)
-]
 
 const CreateBoardModal = ({ isOpen, onClose }: CreateBoardModalProps) => {
   const { createBoardAsync, isCreating, createError, resetCreateError } = useBoards()
@@ -63,11 +49,7 @@ const CreateBoardModal = ({ isOpen, onClose }: CreateBoardModalProps) => {
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="Create new board">
-      {createError && (
-        <div role="alert" className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
-          <p className="text-sm text-red-400">{createError.message}</p>
-        </div>
-      )}
+      {createError && <ErrorAlert message={createError.message} />}
 
       <form noValidate onSubmit={handleSubmit(onSubmit)}>
         <div className="mb-5">

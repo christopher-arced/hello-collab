@@ -204,3 +204,6 @@ export interface ApiError {
   statusCode: number
   details?: unknown
 }
+
+// Re-export socket event types
+export * from './socket-events'

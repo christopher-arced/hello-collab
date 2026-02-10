@@ -115,11 +115,11 @@ export async function createCard(
   listId: string,
   userId: string,
   data: CreateCardInput
-): Promise<Card | null> {
-  const { hasAccess } = await verifyListAccess(listId, userId, true)
-  if (!hasAccess) return null
+): Promise<{ card: Card; boardId: string } | null> {
+  const { hasAccess, boardId } = await verifyListAccess(listId, userId, true)
+  if (!hasAccess || !boardId) return null
 
-  return prisma.$transaction(async (tx) => {
+  const card = await prisma.$transaction(async (tx) => {
     const maxPosition = await tx.card.aggregate({
       where: { listId },
       _max: { position: true },
@@ -137,17 +137,19 @@ export async function createCard(
       select: cardSelect,
     })
   })
+
+  return { card, boardId }
 }
 
 export async function updateCard(
   cardId: string,
   userId: string,
   data: UpdateCardInput
-): Promise<Card | null> {
-  const { hasAccess } = await verifyCardAccess(cardId, userId, true)
-  if (!hasAccess) return null
+): Promise<{ card: Card; boardId: string } | null> {
+  const { hasAccess, card: cardInfo } = await verifyCardAccess(cardId, userId, true)
+  if (!hasAccess || !cardInfo) return null
 
-  return prisma.card.update({
+  const card = await prisma.card.update({
     where: { id: cardId },
     data: {
       ...(data.title !== undefined && { title: data.title.trim() }),
@@ -157,26 +159,31 @@ export async function updateCard(
     },
     select: cardSelect,
   })
+
+  return { card, boardId: cardInfo.boardId }
 }
 
-export async function deleteCard(cardId: string, userId: string): Promise<boolean> {
-  const { hasAccess } = await verifyCardAccess(cardId, userId, true)
-  if (!hasAccess) return false
+export async function deleteCard(
+  cardId: string,
+  userId: string
+): Promise<{ deleted: boolean; listId: string | null; boardId: string | null }> {
+  const { hasAccess, card } = await verifyCardAccess(cardId, userId, true)
+  if (!hasAccess || !card) return { deleted: false, listId: null, boardId: null }
 
   await prisma.card.delete({
     where: { id: cardId },
   })
 
-  return true
+  return { deleted: true, listId: card.listId, boardId: card.boardId }
 }
 
 export async function moveCard(
   cardId: string,
   userId: string,
   data: MoveCardInput
-): Promise<Card | null> {
-  const { hasAccess, card } = await verifyCardAccess(cardId, userId, true)
-  if (!hasAccess || !card) return null
+): Promise<{ card: Card; fromListId: string; boardId: string } | null> {
+  const { hasAccess, card: cardInfo } = await verifyCardAccess(cardId, userId, true)
+  if (!hasAccess || !cardInfo) return null
 
   // Verify target list is on the same board
   const targetList = await prisma.list.findUnique({
@@ -184,7 +191,7 @@ export async function moveCard(
     select: { boardId: true },
   })
 
-  if (!targetList || targetList.boardId !== card.boardId) {
+  if (!targetList || targetList.boardId !== cardInfo.boardId) {
     return null
   }
 
@@ -196,7 +203,9 @@ export async function moveCard(
 
   if (!currentCard) return null
 
-  return prisma.$transaction(async (tx) => {
+  const fromListId = currentCard.listId
+
+  const movedCard = await prisma.$transaction(async (tx) => {
     const isSameList = currentCard.listId === data.toListId
 
     if (isSameList) {
@@ -250,17 +259,19 @@ export async function moveCard(
       select: cardSelect,
     })
   })
+
+  return { card: movedCard, fromListId, boardId: cardInfo.boardId }
 }
 
 export async function reorderCards(
   listId: string,
   userId: string,
   data: ReorderCardsInput
-): Promise<Card[] | null> {
-  const { hasAccess } = await verifyListAccess(listId, userId, true)
-  if (!hasAccess) return null
+): Promise<{ cards: Card[]; boardId: string } | null> {
+  const { hasAccess, boardId } = await verifyListAccess(listId, userId, true)
+  if (!hasAccess || !boardId) return null
 
-  return prisma.$transaction(async (tx) => {
+  const cards = await prisma.$transaction(async (tx) => {
     const existingCards = await tx.card.findMany({
       where: { listId },
       select: { id: true },
@@ -286,4 +297,7 @@ export async function reorderCards(
       orderBy: { position: 'asc' },
     })
   })
+
+  if (!cards) return null
+  return { cards, boardId }
 }

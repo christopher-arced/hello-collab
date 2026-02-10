@@ -712,10 +712,10 @@ gray: { ...tailwind grays }
 - [x] Board CRUD operations
 - [x] List CRUD operations
 - [x] Card CRUD operations
-- [ ] Drag-and-drop for lists
-- [ ] Drag-and-drop for cards
-- [ ] Position/ordering logic
-- [ ] Board detail view with nested data
+- [x] Drag-and-drop for lists
+- [x] Drag-and-drop for cards
+- [x] Position/ordering logic
+- [x] Board detail view with nested data
 
 **Week 3: Real-Time & Polish**
 

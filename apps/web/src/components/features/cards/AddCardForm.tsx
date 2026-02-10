@@ -16,11 +16,13 @@ export default function AddCardForm({
 }: AddCardFormProps) {
   const [internalIsOpen, setInternalIsOpen] = useState(false)
   const isOpen = controlledIsOpen ?? internalIsOpen
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleOpenChange = (open: boolean) => {
     setInternalIsOpen(open)
     onOpenChange?.(open)
   }
+
   const [title, setTitle] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -41,13 +43,19 @@ export default function AddCardForm({
     e.preventDefault()
 
     const trimmed = title.trim()
-    if (trimmed) {
-      handleOpenChange(false)
-      await onAdd(trimmed).then(() => {
-        setTitle('')
-        handleOpenChange(true)
-        textareaRef?.current?.focus()
-      })
+    if (!trimmed || isSubmitting) return
+
+    setIsSubmitting(true)
+    try {
+      await onAdd(trimmed)
+      setTitle('')
+      handleOpenChange(true)
+      textareaRef?.current?.focus()
+    } catch {
+      // Keep the form open with the current title on error
+      // so the user can retry
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -56,9 +64,24 @@ export default function AddCardForm({
       e.preventDefault()
       handleSubmit(e)
     } else if (e.key === 'Escape') {
+      handleClose()
+    }
+  }
+
+  const handleClose = () => {
+    if (!isSubmitting) {
       handleOpenChange(false)
       setTitle('')
     }
+  }
+
+  const handleBlur = (e: React.FocusEvent) => {
+    // Don't close if focus is moving to a button within the form
+    const relatedTarget = e.relatedTarget as HTMLElement | null
+    if (relatedTarget?.closest('form') === e.currentTarget.closest('form')) {
+      return
+    }
+    handleClose()
   }
 
   return (
@@ -71,10 +94,8 @@ export default function AddCardForm({
           autoResize()
         }}
         onKeyDown={handleKeyDown}
-        onBlur={() => {
-          handleOpenChange(false)
-          setTitle('')
-        }}
+        onBlur={handleBlur}
+        disabled={isSubmitting}
         placeholder="Enter a title for this card..."
         className="w-full px-2.5 py-2 text-sm rounded-lg border resize-none focus:outline-none bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:border-gray-400 dark:focus:border-gray-500 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 overflow-hidden"
         rows={1}

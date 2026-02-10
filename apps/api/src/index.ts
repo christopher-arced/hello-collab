@@ -2,6 +2,7 @@ import { createServer } from 'http'
 import { Server } from 'socket.io'
 import dotenv from 'dotenv'
 import { createApp } from './app'
+import { registerSocketHandlers, setSocketServer } from './sockets'
 
 dotenv.config()
 
@@ -19,15 +20,11 @@ const io = new Server(httpServer, {
   },
 })
 
-io.on('connection', (socket) => {
-  // eslint-disable-next-line no-console
-  console.log('Client connected:', socket.id)
+// Set socket server for emitter (used by controllers)
+setSocketServer(io)
 
-  socket.on('disconnect', () => {
-    // eslint-disable-next-line no-console
-    console.log('Client disconnected:', socket.id)
-  })
-})
+// Register socket handlers with authentication
+registerSocketHandlers(io)
 
 const PORT = process.env.PORT || 3000
 

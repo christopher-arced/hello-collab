@@ -1,7 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { Board } from '@hello/types'
+import type { Board, List, Card } from '@hello/types'
 import type { CreateBoardInput, UpdateBoardInput } from '@hello/validation'
 import { fetcher, ApiError } from '../lib/api'
+import { LIST_KEYS } from './useLists'
+import { CARD_KEYS } from './useCards'
 
 const BOARD_KEYS = {
   all: ['boards'] as const,
@@ -55,7 +57,25 @@ export function useBoard(boardId: string) {
     error,
   } = useQuery({
     queryKey: BOARD_KEYS.detail(boardId),
-    queryFn: () => fetcher<Board>(`/api/boards/${boardId}`),
+    queryFn: async () => {
+      const boardData = await fetcher<Board>(`/api/boards/${boardId}`)
+
+      // Pre-populate lists and cards caches from nested data
+      if (boardData.lists) {
+        // Set lists cache (without cards to match expected type)
+        const listsWithoutCards: List[] = boardData.lists.map(({ cards: _cards, ...list }) => list)
+        queryClient.setQueryData(LIST_KEYS.byBoard(boardId), listsWithoutCards)
+
+        // Set cards cache for each list
+        boardData.lists.forEach((list) => {
+          if (list.cards) {
+            queryClient.setQueryData<Card[]>(CARD_KEYS.byList(list.id), list.cards)
+          }
+        })
+      }
+
+      return boardData
+    },
     enabled: !!boardId,
   })
 

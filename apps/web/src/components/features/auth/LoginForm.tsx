@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { loginSchema, LoginInput } from '@hello/validation'
-import { Input, Button } from '../../common'
+import { Input, Button, ErrorAlert } from '../../common'
 import { EmailIcon, LockIcon, EyeIcon, EyeOffIcon } from '../../icons'
 import { useAuth } from '../../../hooks/useAuth'
 
@@ -35,11 +35,7 @@ const LoginForm = () => {
         Sign in to continue to your workspace
       </p>
 
-      {loginError && (
-        <div role="alert" className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
-          <p className="text-sm text-red-400">{loginError.message}</p>
-        </div>
-      )}
+      {loginError && <ErrorAlert message={loginError.message} />}
 
       <form noValidate onSubmit={handleSubmit(onSubmit)}>
         <div className="mb-5">
