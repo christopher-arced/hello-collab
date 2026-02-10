@@ -1,15 +1,8 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  useCallback,
-  useRef,
-  type ReactNode,
-} from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react'
 import { io, Socket } from 'socket.io-client'
 import { SOCKET_EVENTS } from '@hello/types'
 import { API_BASE_URL } from '@/lib/api'
+import { useAuthStore } from '@/stores/authStore'
 
 type ConnectionState = 'connecting' | 'connected' | 'disconnected' | 'error'
 
@@ -38,18 +31,16 @@ interface SocketProviderProps {
 
 export function SocketProvider({ children }: SocketProviderProps) {
   const [socket, setSocket] = useState<Socket | null>(null)
-  const [connectionState, setConnectionState] = useState<ConnectionState>('connecting')
+  const [connectionState, setConnectionState] = useState<ConnectionState>('disconnected')
   const [connectionError, setConnectionError] = useState<string | null>(null)
 
-  // Track current board for reconnection
-  const currentBoardRef = useRef<string | null>(null)
-
   useEffect(() => {
-    // Create socket connection with credentials
+    // Create socket but don't connect yet — the auth effect below
+    // will call socket.connect() once the user is authenticated.
     const newSocket = io(API_BASE_URL, {
       withCredentials: true,
       transports: ['websocket', 'polling'],
-      autoConnect: true,
+      autoConnect: false,
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
@@ -61,11 +52,6 @@ export function SocketProvider({ children }: SocketProviderProps) {
       console.log('Socket connected:', newSocket.id)
       setConnectionState('connected')
       setConnectionError(null)
-
-      // Rejoin board if we were in one before disconnect
-      if (currentBoardRef.current) {
-        newSocket.emit(SOCKET_EVENTS.JOIN_BOARD, { boardId: currentBoardRef.current })
-      }
     })
 
     newSocket.on('disconnect', (reason) => {
@@ -101,15 +87,22 @@ export function SocketProvider({ children }: SocketProviderProps) {
     setSocket(newSocket)
 
     return () => {
-      currentBoardRef.current = null
       newSocket.close()
     }
   }, [])
 
+  // Reconnect the socket when the user logs in after a failed initial connection
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+
+  useEffect(() => {
+    if (socket && isAuthenticated && !socket.connected) {
+      socket.connect()
+    }
+  }, [socket, isAuthenticated])
+
   const joinBoard = useCallback(
     (boardId: string) => {
       if (socket && connectionState === 'connected') {
-        currentBoardRef.current = boardId
         socket.emit(SOCKET_EVENTS.JOIN_BOARD, { boardId })
       }
     },
@@ -119,9 +112,6 @@ export function SocketProvider({ children }: SocketProviderProps) {
   const leaveBoard = useCallback(
     (boardId: string) => {
       if (socket && connectionState === 'connected') {
-        if (currentBoardRef.current === boardId) {
-          currentBoardRef.current = null
-        }
         socket.emit(SOCKET_EVENTS.LEAVE_BOARD, { boardId })
       }
     },
