@@ -67,9 +67,9 @@ export default function BoardPage() {
   const { handleReorderCards, handleMoveCard } = useCardOperations()
 
   const { members } = useBoardMembers(id!)
-  const canEdit = members.some(
-    (m) => m.userId === currentUser?.id && (m.role === 'OWNER' || m.role === 'EDITOR')
-  )
+  const currentMember = members.find((m) => m.userId === currentUser?.id)
+  const canEdit = currentMember?.role === 'OWNER' || currentMember?.role === 'EDITOR'
+  const isOwner = currentMember?.role === 'OWNER'
 
   const handleDelete = () => {
     deleteBoardAsync().then(() => navigate('/'))
@@ -148,6 +148,7 @@ export default function BoardPage() {
           isConnected={isConnected}
           activeUsers={activeUsers}
           canEdit={canEdit}
+          isOwner={isOwner}
           onEdit={() => setIsEditModalOpen(true)}
           onDelete={() => setIsDeleteModalOpen(true)}
           onShare={() => setIsMembersPanelOpen(true)}
@@ -183,7 +184,7 @@ export default function BoardPage() {
         />
       )}
 
-      {canEdit && (
+      {isOwner && (
         <ConfirmModal
           isOpen={isDeleteModalOpen}
           onClose={() => setIsDeleteModalOpen(false)}

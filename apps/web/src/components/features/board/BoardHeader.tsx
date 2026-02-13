@@ -7,6 +7,7 @@ interface BoardHeaderProps {
   isConnected: boolean
   activeUsers: SocketUser[]
   canEdit?: boolean
+  isOwner?: boolean
   onEdit: () => void
   onDelete: () => void
   onShare: () => void
@@ -17,6 +18,7 @@ export function BoardHeader({
   isConnected,
   activeUsers,
   canEdit,
+  isOwner,
   onEdit,
   onDelete,
   onShare,
@@ -67,7 +69,7 @@ export function BoardHeader({
                 Edit Board
               </Button>
             )}
-            {canEdit && (
+            {isOwner && (
               <Button
                 variant="outline"
                 onClick={onDelete}
