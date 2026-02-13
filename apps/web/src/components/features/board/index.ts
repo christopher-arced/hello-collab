@@ -1,3 +1,5 @@
 export { ActiveUsers } from './ActiveUsers'
+export { BoardHeader } from './BoardHeader'
 export { BoardMembersPanel } from './BoardMembersPanel'
+export { EditBoardModal } from './EditBoardModal'
 export * from './members'

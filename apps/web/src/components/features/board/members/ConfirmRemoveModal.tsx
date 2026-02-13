@@ -1,5 +1,5 @@
 import type { BoardMember } from '@hello/types'
-import { Modal, Button } from '@/components/common'
+import { ConfirmModal } from '@/components/common'
 
 interface ConfirmRemoveModalProps {
   member: BoardMember | null
@@ -22,34 +22,25 @@ export function ConfirmRemoveModal({
   const confirmText = isCurrentUser ? 'Leave Board' : 'Remove'
 
   return (
-    <Modal isOpen={!!member} onClose={onClose} title={title}>
-      <p className="text-theme-text-secondary dark:text-theme-dark-text-secondary mb-6">
-        {isCurrentUser ? (
-          'Are you sure you want to leave this board? You will lose access to it.'
-        ) : (
-          <>
-            Are you sure you want to remove{' '}
-            <strong className="text-theme-text dark:text-theme-dark-text">
-              {member.user?.name}
-            </strong>{' '}
-            from this board?
-          </>
-        )}
-      </p>
-      <div className="flex gap-3">
-        <Button type="button" variant="secondary" onClick={onClose} className="flex-1">
-          Cancel
-        </Button>
-        <Button
-          type="button"
-          variant="primary"
-          loading={isLoading}
-          onClick={onConfirm}
-          className="flex-1 !bg-red-500 hover:!bg-red-600"
-        >
-          {isLoading ? 'Removing...' : confirmText}
-        </Button>
-      </div>
-    </Modal>
+    <ConfirmModal
+      isOpen={!!member}
+      onClose={onClose}
+      onConfirm={onConfirm}
+      title={title}
+      confirmLabel={confirmText}
+      loadingLabel="Removing..."
+      isLoading={isLoading}
+      variant="danger"
+    >
+      {isCurrentUser ? (
+        'Are you sure you want to leave this board? You will lose access to it.'
+      ) : (
+        <>
+          Are you sure you want to remove{' '}
+          <strong className="text-theme-text dark:text-theme-dark-text">{member.user?.name}</strong>{' '}
+          from this board?
+        </>
+      )}
+    </ConfirmModal>
   )
 }
