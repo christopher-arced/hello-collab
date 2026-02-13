@@ -36,7 +36,7 @@ interface UseRealtimeSyncOptions {
 
 export function useRealtimeSync(boardId: string | undefined, options: UseRealtimeSyncOptions = {}) {
   const queryClient = useQueryClient()
-  const { socket, isConnected, on } = useBoardRoom(boardId)
+  const { socket, isConnected, on, joinBoard, leaveBoard } = useBoardRoom()
 
   // Use refs to avoid re-running effect when callbacks change
   const onBoardDeletedRef = useRef(options.onBoardDeleted)
@@ -52,6 +52,10 @@ export function useRealtimeSync(boardId: string | undefined, options: UseRealtim
 
   useEffect(() => {
     if (!socket || !isConnected || !boardId) return
+
+    // Register all event listeners BEFORE joining the board room.
+    // This prevents a race where the server responds to JOIN_BOARD
+    // with USERS_ACTIVE before the listener is registered.
 
     // List events
     const unsubListCreated = on<ListCreatedEvent>(SOCKET_EVENTS.LIST_CREATED, (data) => {
@@ -163,7 +167,11 @@ export function useRealtimeSync(boardId: string | undefined, options: UseRealtim
       onActiveUsersChangeRef.current?.(data.users)
     })
 
+    // Join the board room AFTER all listeners are registered
+    joinBoard(boardId)
+
     return () => {
+      leaveBoard(boardId)
       unsubListCreated()
       unsubListUpdated()
       unsubListDeleted()
@@ -180,7 +188,7 @@ export function useRealtimeSync(boardId: string | undefined, options: UseRealtim
       unsubMemberRemoved()
       unsubActiveUsers()
     }
-  }, [socket, isConnected, boardId, queryClient, on])
+  }, [socket, isConnected, boardId, queryClient, on, joinBoard, leaveBoard])
 
   return { isConnected }
 }

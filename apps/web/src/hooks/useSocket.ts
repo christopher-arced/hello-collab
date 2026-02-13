@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react'
+import { useCallback } from 'react'
 import { useSocketContext } from '@/contexts/SocketContext'
 
 export function useSocket() {
@@ -7,18 +7,8 @@ export function useSocket() {
   return { socket, isConnected, connectionState, connectionError, joinBoard, leaveBoard }
 }
 
-export function useBoardRoom(boardId: string | undefined) {
+export function useBoardRoom() {
   const { socket, isConnected, joinBoard, leaveBoard } = useSocketContext()
-
-  useEffect(() => {
-    if (!boardId || !isConnected) return
-
-    joinBoard(boardId)
-
-    return () => {
-      leaveBoard(boardId)
-    }
-  }, [boardId, isConnected, joinBoard, leaveBoard])
 
   const on = useCallback(
     <T>(event: string, callback: (data: T) => void) => {
@@ -31,5 +21,5 @@ export function useBoardRoom(boardId: string | undefined) {
     [socket]
   )
 
-  return { socket, isConnected, on }
+  return { socket, isConnected, on, joinBoard, leaveBoard }
 }
