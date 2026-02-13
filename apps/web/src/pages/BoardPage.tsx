@@ -66,10 +66,12 @@ export default function BoardPage() {
 
   const { handleReorderCards, handleMoveCard } = useCardOperations()
 
-  const { members } = useBoardMembers(id!)
+  const { members, isLoading: isLoadingMembers } = useBoardMembers(id!)
   const currentMember = members.find((m) => m.userId === currentUser?.id)
-  const canEdit = currentMember?.role === 'OWNER' || currentMember?.role === 'EDITOR'
-  const isOwner = currentMember?.role === 'OWNER'
+  const canEdit = isLoadingMembers
+    ? undefined
+    : currentMember?.role === 'OWNER' || currentMember?.role === 'EDITOR'
+  const isOwner = isLoadingMembers ? undefined : currentMember?.role === 'OWNER'
 
   const handleDelete = () => {
     deleteBoardAsync().then(() => navigate('/'))

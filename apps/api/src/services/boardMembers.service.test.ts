@@ -106,13 +106,48 @@ describe('boardMembers.service', () => {
       })
     })
 
-    it('should return empty array when board has no members', async () => {
+    it('should return empty array when board has no members and owner lookup fails', async () => {
       vi.mocked(verifyBoardAccess).mockResolvedValue(mockOwnerAccess)
       vi.mocked(prisma.boardMember.findMany).mockResolvedValue([] as never)
+      vi.mocked(prisma.board.findUnique).mockResolvedValue(null)
 
       const result = await getBoardMembers('board-123', 'user-123')
 
       expect(result).toEqual([])
+    })
+
+    it('should include board owner in members list when not explicitly a member', async () => {
+      vi.mocked(verifyBoardAccess).mockResolvedValue(mockOwnerAccess)
+      vi.mocked(prisma.boardMember.findMany).mockResolvedValue([] as never)
+      vi.mocked(prisma.board.findUnique).mockResolvedValue({
+        createdAt: new Date('2024-01-01'),
+        owner: mockUser,
+      } as never)
+
+      const result = await getBoardMembers('board-123', 'user-123')
+
+      expect(result).toHaveLength(1)
+      expect(result![0].userId).toBe('owner-123')
+      expect(result![0].role).toBe('OWNER')
+      expect(prisma.board.findUnique).toHaveBeenCalledWith({
+        where: { id: 'board-123' },
+        select: expect.any(Object),
+      })
+    })
+
+    it('should not duplicate owner in members list if already present', async () => {
+      const ownerMember = {
+        ...mockMember,
+        userId: 'owner-123',
+        role: 'OWNER',
+      }
+      vi.mocked(verifyBoardAccess).mockResolvedValue(mockOwnerAccess)
+      vi.mocked(prisma.boardMember.findMany).mockResolvedValue([ownerMember] as never)
+
+      const result = await getBoardMembers('board-123', 'user-123')
+
+      expect(result).toHaveLength(1)
+      expect(prisma.board.findUnique).not.toHaveBeenCalled()
     })
   })
 
@@ -146,6 +181,18 @@ describe('boardMembers.service', () => {
       })
 
       expect(result).toEqual({ error: 'User with this email not found' })
+    })
+
+    it('should return error when trying to add the board owner', async () => {
+      vi.mocked(verifyBoardAccess).mockResolvedValue(mockOwnerAccess)
+      vi.mocked(prisma.user.findUnique).mockResolvedValue({ id: 'owner-123' } as never)
+
+      const result = await addBoardMember('board-123', 'user-123', {
+        email: 'owner@example.com',
+      })
+
+      expect(result).toEqual({ error: 'The board owner is already a member' })
+      expect(prisma.boardMember.create).not.toHaveBeenCalled()
     })
 
     it('should return error when user is already a member', async () => {
