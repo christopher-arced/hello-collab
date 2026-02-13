@@ -719,10 +719,10 @@ gray: { ...tailwind grays }
 
 **Week 3: Real-Time & Polish**
 
-- [ ] Set up Socket.io (client + server)
-- [ ] Implement WebSocket events for all operations
-- [ ] Real-time updates across clients
-- [ ] Active users indicator
+- [x] Set up Socket.io (client + server)
+- [x] Implement WebSocket events for all operations
+- [x] Real-time updates across clients
+- [x] Active users indicator
 - [ ] Loading states & error handling
 - [ ] Responsive design
 - [ ] Dark/light theme
