@@ -34,6 +34,38 @@ export async function getBoardMembers(
     orderBy: [{ role: 'asc' }, { joinedAt: 'asc' }],
   })
 
+  // Include the board owner if they don't have an explicit BoardMember row
+  const ownerInMembers = members.some((m) => m.userId === access.ownerId)
+  if (!ownerInMembers && access.ownerId) {
+    const board = await prisma.board.findUnique({
+      where: { id: boardId },
+      select: {
+        createdAt: true,
+        owner: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            avatarUrl: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
+      },
+    })
+
+    if (board) {
+      members.unshift({
+        id: `owner-${access.ownerId}`,
+        boardId,
+        userId: access.ownerId,
+        role: 'OWNER',
+        joinedAt: board.createdAt,
+        user: board.owner,
+      } as (typeof members)[0])
+    }
+  }
+
   return members as BoardMember[]
 }
 
@@ -60,6 +92,11 @@ export async function addBoardMember(
 
   if (!userToAdd) {
     return { error: 'User with this email not found' }
+  }
+
+  // Cannot add the board owner as a member (they already have full access)
+  if (userToAdd.id === access.ownerId) {
+    return { error: 'The board owner is already a member' }
   }
 
   // Check if user is already a member

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { addBoardMemberSchema, AddBoardMemberInput } from '@hello/validation'
@@ -9,9 +10,11 @@ interface AddMemberFormProps {
   onSubmit: (data: AddBoardMemberInput) => Promise<BoardMember>
   isLoading: boolean
   error: ApiError | null
+  memberEmails: string[]
 }
 
-export function AddMemberForm({ onSubmit, isLoading, error }: AddMemberFormProps) {
+export function AddMemberForm({ onSubmit, isLoading, error, memberEmails }: AddMemberFormProps) {
+  const [localError, setLocalError] = useState<string | null>(null)
   const {
     register,
     handleSubmit,
@@ -23,6 +26,13 @@ export function AddMemberForm({ onSubmit, isLoading, error }: AddMemberFormProps
   })
 
   const handleFormSubmit = async (data: AddBoardMemberInput) => {
+    setLocalError(null)
+
+    if (memberEmails.includes(data.email.toLowerCase())) {
+      setLocalError('This user is already a member of the board')
+      return
+    }
+
     try {
       await onSubmit(data)
       reset()
@@ -61,9 +71,9 @@ export function AddMemberForm({ onSubmit, isLoading, error }: AddMemberFormProps
         </select>
       </div>
 
-      {error && (
+      {(error || localError) && (
         <div role="alert" className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
-          <p className="text-sm text-red-400">{error.message}</p>
+          <p className="text-sm text-red-400">{localError ?? error?.message}</p>
         </div>
       )}
 

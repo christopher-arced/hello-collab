@@ -6,6 +6,7 @@ interface BoardHeaderProps {
   board: Board
   isConnected: boolean
   activeUsers: SocketUser[]
+  canEdit?: boolean
   onEdit: () => void
   onDelete: () => void
   onShare: () => void
@@ -15,6 +16,7 @@ export function BoardHeader({
   board,
   isConnected,
   activeUsers,
+  canEdit,
   onEdit,
   onDelete,
   onShare,
@@ -56,20 +58,24 @@ export function BoardHeader({
               </svg>
               Share
             </Button>
-            <Button
-              variant="outline"
-              onClick={onEdit}
-              className="!bg-white/20 !border-white/30 !text-white hover:!bg-white/30"
-            >
-              Edit Board
-            </Button>
-            <Button
-              variant="outline"
-              onClick={onDelete}
-              className="!bg-black/20 !border-black/20 !text-white hover:!bg-black/30"
-            >
-              Delete
-            </Button>
+            {canEdit && (
+              <Button
+                variant="outline"
+                onClick={onEdit}
+                className="!bg-white/20 !border-white/30 !text-white hover:!bg-white/30"
+              >
+                Edit Board
+              </Button>
+            )}
+            {canEdit && (
+              <Button
+                variant="outline"
+                onClick={onDelete}
+                className="!bg-black/20 !border-black/20 !text-white hover:!bg-black/30"
+              >
+                Delete
+              </Button>
+            )}
           </div>
         </div>
       </div>

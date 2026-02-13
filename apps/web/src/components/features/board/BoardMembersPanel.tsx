@@ -36,6 +36,9 @@ export function BoardMembersPanel({
   const currentUserMembership = members.find((m) => m.userId === currentUser?.id)
   const isOwner = currentUserMembership?.role === 'OWNER' || boardOwnerId === currentUser?.id
   const canAddMembers = isOwner || currentUserMembership?.role === 'EDITOR'
+  const memberEmails = members
+    .map((m) => m.user?.email?.toLowerCase())
+    .filter((e): e is string => !!e)
 
   const canEditMemberRole = (member: BoardMember) => {
     return isOwner && member.userId !== boardOwnerId
@@ -73,7 +76,12 @@ export function BoardMembersPanel({
       <Modal isOpen={isOpen} onClose={onClose} title="Board Members">
         <div className="space-y-6">
           {canAddMembers && (
-            <AddMemberForm onSubmit={addMemberAsync} isLoading={isAdding} error={addError} />
+            <AddMemberForm
+              onSubmit={addMemberAsync}
+              isLoading={isAdding}
+              error={addError}
+              memberEmails={memberEmails}
+            />
           )}
 
           <div className="space-y-2">
