@@ -14,8 +14,11 @@ const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
   const trapFocus = useCallback((e: KeyboardEvent) => {
     if (e.key !== 'Tab' || !modalRef.current) return
 
-    const focusableElements = modalRef.current.querySelectorAll<HTMLElement>(
+    const candidates = modalRef.current.querySelectorAll<HTMLElement>(
       'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )
+    const focusableElements = Array.from(candidates).filter(
+      (el) => el.offsetParent !== null && getComputedStyle(el).visibility !== 'hidden'
     )
     if (focusableElements.length === 0) return
 

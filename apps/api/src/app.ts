@@ -11,10 +11,10 @@ import cardsRoutes from './routes/cards'
 export function createApp() {
   const app = express()
 
-  const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:5173'
   if (process.env.NODE_ENV === 'production' && !process.env.CORS_ORIGIN) {
-    console.warn('WARNING: CORS_ORIGIN not set in production, defaulting to localhost')
+    throw new Error('CORS_ORIGIN environment variable is required in production')
   }
+  const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:5173'
 
   app.use(
     cors({
