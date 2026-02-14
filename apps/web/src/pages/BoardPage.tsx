@@ -10,6 +10,7 @@ import { BoardMembersPanel } from '@/components/features/board/BoardMembersPanel
 import { useAuthStore } from '@/stores/authStore'
 import { useBoard } from '@/hooks/useBoards'
 import { useLists } from '@/hooks/useLists'
+import { useBoardMembers } from '@/hooks/useBoardMembers'
 import { useRealtimeSync } from '@/hooks/useRealtimeSync'
 import { useCardOperations } from '@/hooks/useCardOperations'
 
@@ -64,6 +65,13 @@ export default function BoardPage() {
   } = useLists(id!)
 
   const { handleReorderCards, handleMoveCard } = useCardOperations()
+
+  const { members, isLoading: isLoadingMembers } = useBoardMembers(id!)
+  const currentMember = members.find((m) => m.userId === currentUser?.id)
+  const canEdit = isLoadingMembers
+    ? undefined
+    : currentMember?.role === 'OWNER' || currentMember?.role === 'EDITOR'
+  const isOwner = isLoadingMembers ? undefined : currentMember?.role === 'OWNER'
 
   const handleDelete = () => {
     deleteBoardAsync().then(() => navigate('/'))
@@ -141,6 +149,8 @@ export default function BoardPage() {
           board={board}
           isConnected={isConnected}
           activeUsers={activeUsers}
+          canEdit={canEdit}
+          isOwner={isOwner}
           onEdit={() => setIsEditModalOpen(true)}
           onDelete={() => setIsDeleteModalOpen(true)}
           onShare={() => setIsMembersPanelOpen(true)}
@@ -151,6 +161,7 @@ export default function BoardPage() {
           lists={lists}
           boardColor={board.bgColor}
           isLoading={isLoadingLists}
+          canEdit={canEdit}
           onCreateList={handleCreateList}
           onUpdateList={handleUpdateList}
           onDeleteList={handleDeleteList}
@@ -163,30 +174,34 @@ export default function BoardPage() {
         />
       </main>
 
-      <EditBoardModal
-        board={board}
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        onSave={(data) => updateBoardAsync(data)}
-        isSaving={isUpdating}
-        saveError={updateError}
-        onResetError={resetUpdateError}
-      />
+      {canEdit && (
+        <EditBoardModal
+          board={board}
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          onSave={(data) => updateBoardAsync(data)}
+          isSaving={isUpdating}
+          saveError={updateError}
+          onResetError={resetUpdateError}
+        />
+      )}
 
-      <ConfirmModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-        onConfirm={handleDelete}
-        title="Delete board"
-        confirmLabel="Delete Board"
-        loadingLabel="Deleting..."
-        isLoading={isDeleting}
-        variant="danger"
-      >
-        Are you sure you want to delete{' '}
-        <strong className="text-theme-text dark:text-theme-dark-text">{board.title}</strong>? This
-        action cannot be undone.
-      </ConfirmModal>
+      {isOwner && (
+        <ConfirmModal
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+          onConfirm={handleDelete}
+          title="Delete board"
+          confirmLabel="Delete Board"
+          loadingLabel="Deleting..."
+          isLoading={isDeleting}
+          variant="danger"
+        >
+          Are you sure you want to delete{' '}
+          <strong className="text-theme-text dark:text-theme-dark-text">{board.title}</strong>? This
+          action cannot be undone.
+        </ConfirmModal>
+      )}
 
       <BoardMembersPanel
         boardId={id!}

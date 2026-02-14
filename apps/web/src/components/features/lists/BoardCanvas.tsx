@@ -22,6 +22,7 @@ interface BoardCanvasProps {
   lists: List[]
   boardColor: string
   isLoading?: boolean
+  canEdit?: boolean
   onCreateList: (title: string) => Promise<void>
   onUpdateList: (listId: string, title: string) => void
   onDeleteList: (listId: string) => Promise<void>
@@ -42,6 +43,7 @@ export default function BoardCanvas({
   lists,
   boardColor,
   isLoading,
+  canEdit,
   onCreateList,
   onUpdateList,
   onDeleteList,
@@ -68,7 +70,7 @@ export default function BoardCanvas({
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
-      activationConstraint: { distance: 8 },
+      activationConstraint: { distance: canEdit === false ? Infinity : 8 },
     }),
     useSensor(KeyboardSensor)
   )
@@ -276,6 +278,7 @@ export default function BoardCanvas({
                   <ListCard
                     key={list.id}
                     list={list}
+                    canEdit={canEdit}
                     onUpdateTitle={(title) => onUpdateList(list.id, title)}
                     onDelete={() => onDeleteList(list.id)}
                     isUpdating={isUpdating}
@@ -286,7 +289,7 @@ export default function BoardCanvas({
                   />
                 ))}
               </SortableContext>
-              <AddListForm onAdd={onCreateList} isAdding={isCreating} />
+              {canEdit !== false && <AddListForm onAdd={onCreateList} isAdding={isCreating} />}
             </>
           )}
         </div>

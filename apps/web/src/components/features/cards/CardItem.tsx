@@ -8,6 +8,7 @@ import { DragIcon } from '../../icons'
 export interface CardItemProps {
   card: Card
   listId: string
+  canEdit?: boolean
   onUpdateTitle: (title: string) => void
   onDelete: () => void
   onOpenDetail?: () => void
@@ -40,6 +41,7 @@ function getDueDateColor(date: Date): string {
 export default function CardItem({
   card,
   listId,
+  canEdit,
   onUpdateTitle,
   onDelete,
   onOpenDetail,
@@ -115,14 +117,16 @@ export default function CardItem({
 
       <div className="p-2.5">
         <div className="flex items-start gap-1">
-          <button
-            type="button"
-            className="opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing p-0.5 -ml-0.5 mr-0.5 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 touch-none transition-opacity"
-            {...attributes}
-            {...listeners}
-          >
-            <DragIcon size={14} />
-          </button>
+          {canEdit !== false && (
+            <button
+              type="button"
+              className="opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing p-0.5 -ml-0.5 mr-0.5 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 touch-none transition-opacity"
+              {...attributes}
+              {...listeners}
+            >
+              <DragIcon size={14} />
+            </button>
+          )}
           {isEditing ? (
             <textarea
               ref={inputRef}
@@ -150,23 +154,25 @@ export default function CardItem({
             </p>
           )}
 
-          <DropdownMenu
-            items={[
-              {
-                label: 'Edit title',
-                onClick: () => setIsEditing(true),
-              },
-              {
-                label: isDeleting ? 'Deleting...' : 'Delete card',
-                onClick: onDelete,
-                disabled: isDeleting,
-                variant: 'danger',
-              },
-            ]}
-            triggerSize={14}
-            triggerClassName="p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-            ariaLabel="Card options"
-          />
+          {canEdit !== false && (
+            <DropdownMenu
+              items={[
+                {
+                  label: 'Edit title',
+                  onClick: () => setIsEditing(true),
+                },
+                {
+                  label: isDeleting ? 'Deleting...' : 'Delete card',
+                  onClick: onDelete,
+                  disabled: isDeleting,
+                  variant: 'danger',
+                },
+              ]}
+              triggerSize={14}
+              triggerClassName="p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              ariaLabel="Card options"
+            />
+          )}
         </div>
 
         {(card.description || card.dueDate) && (

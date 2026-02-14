@@ -11,6 +11,7 @@ import { Button, DropdownMenu } from '@/components/common'
 
 export interface ListCardProps {
   list: List
+  canEdit?: boolean
   onUpdateTitle: (title: string) => void
   onDelete: () => void
   isUpdating?: boolean
@@ -20,6 +21,7 @@ export interface ListCardProps {
 
 export default function ListCard({
   list,
+  canEdit,
   onUpdateTitle,
   onDelete,
   isUpdating,
@@ -159,15 +161,17 @@ export default function ListCard({
       className="w-72 flex-shrink-0 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700/50 flex flex-col max-h-full"
     >
       <div className="px-4 py-3 flex items-center justify-between">
-        <button
-          type="button"
-          className="cursor-grab active:cursor-grabbing p-1 -ml-1 mr-1 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 touch-none"
-          {...attributes}
-          {...listeners}
-        >
-          <DragIcon size={16} />
-        </button>
-        {isEditing ? (
+        {canEdit !== false && (
+          <button
+            type="button"
+            className="cursor-grab active:cursor-grabbing p-1 -ml-1 mr-1 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 touch-none"
+            {...attributes}
+            {...listeners}
+          >
+            <DragIcon size={16} />
+          </button>
+        )}
+        {isEditing && canEdit !== false ? (
           <input
             ref={inputRef}
             type="text"
@@ -181,25 +185,27 @@ export default function ListCard({
           />
         ) : (
           <h3
-            onClick={() => setIsEditing(true)}
-            className="flex-1 min-w-0 px-1 py-0.5 text-sm cursor-pointer rounded hover:bg-black/5 dark:hover:bg-white/5 text-gray-800 dark:text-gray-100 font-medium break-words"
+            onClick={canEdit !== false ? () => setIsEditing(true) : undefined}
+            className={`flex-1 min-w-0 px-1 py-0.5 text-sm rounded text-gray-800 dark:text-gray-100 font-medium break-words ${canEdit !== false ? 'cursor-pointer hover:bg-black/5 dark:hover:bg-white/5' : ''}`}
           >
             {title}
           </h3>
         )}
 
-        <DropdownMenu
-          items={[
-            {
-              label: isDeleting ? 'Deleting...' : 'Delete list',
-              onClick: onDelete,
-              disabled: isDeleting,
-              variant: 'danger',
-            },
-          ]}
-          menuWidth="w-48"
-          ariaLabel="List options"
-        />
+        {canEdit !== false && (
+          <DropdownMenu
+            items={[
+              {
+                label: isDeleting ? 'Deleting...' : 'Delete list',
+                onClick: onDelete,
+                disabled: isDeleting,
+                variant: 'danger',
+              },
+            ]}
+            menuWidth="w-48"
+            ariaLabel="List options"
+          />
+        )}
       </div>
 
       <div
@@ -232,6 +238,7 @@ export default function ListCard({
                   <CardItem
                     card={card}
                     listId={list.id}
+                    canEdit={canEdit}
                     onUpdateTitle={(newTitle) =>
                       updateCard({ cardId: card.id, data: { title: newTitle } })
                     }
@@ -252,7 +259,7 @@ export default function ListCard({
                 />
               )}
               <div ref={addCardFormRef}>
-                {isAddCardOpen && (
+                {canEdit !== false && isAddCardOpen && (
                   <AddCardForm
                     onAdd={async (cardTitle) => {
                       await createCardAsync({ title: cardTitle })
@@ -267,7 +274,7 @@ export default function ListCard({
         )}
       </div>
 
-      {!isAddCardOpen && !isCreatingCard && (
+      {canEdit !== false && !isAddCardOpen && !isCreatingCard && (
         <Button
           className=" text-sm font-normal flex items-center !px-0"
           variant="ghost"
@@ -286,6 +293,7 @@ export default function ListCard({
           card={selectedCard}
           isOpen={!!selectedCard}
           onClose={handleCloseCardDetail}
+          canEdit={canEdit}
           onUpdate={handleUpdateCard}
           onDelete={handleDeleteCard}
           isUpdating={isUpdatingCard}

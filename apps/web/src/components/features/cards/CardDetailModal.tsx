@@ -10,6 +10,7 @@ interface CardDetailModalProps {
   card: Card
   isOpen: boolean
   onClose: () => void
+  canEdit?: boolean
   onUpdate: (data: UpdateCardInput) => Promise<void>
   onDelete: () => void
   isUpdating?: boolean
@@ -34,6 +35,7 @@ export default function CardDetailModal({
   card,
   isOpen,
   onClose,
+  canEdit,
   onUpdate,
   onDelete,
   isUpdating,
@@ -41,6 +43,7 @@ export default function CardDetailModal({
   updateError,
   resetUpdateError,
 }: CardDetailModalProps) {
+  const readOnly = canEdit === false
   const {
     register,
     handleSubmit,
@@ -124,6 +127,7 @@ export default function CardDetailModal({
             type="text"
             placeholder="Enter card title"
             errorMessage={errors.title?.message}
+            disabled={readOnly}
             {...register('title')}
           />
         </div>
@@ -137,6 +141,7 @@ export default function CardDetailModal({
             placeholder="Add a more detailed description..."
             className="w-full py-3 px-4 rounded-[10px] text-theme-text dark:text-white text-[15px] bg-black/[0.02] dark:bg-white/[0.02] border border-black/[0.08] dark:border-white/[0.08] placeholder:text-theme-text-muted dark:placeholder:text-theme-dark-text-muted focus:outline-none focus:bg-indigo-500/5 focus:border-indigo-500/50 transition-all duration-200 resize-none"
             rows={4}
+            disabled={readOnly}
             {...register('description')}
           />
           {errors.description && (
@@ -164,9 +169,10 @@ export default function CardDetailModal({
                   setValue('dueDate', null, { shouldDirty: true })
                 }
               }}
+              disabled={readOnly}
               className="flex-1 py-3 px-4 rounded-[10px] text-theme-text dark:text-white text-[15px] bg-black/[0.02] dark:bg-white/[0.02] border border-black/[0.08] dark:border-white/[0.08] focus:outline-none focus:bg-indigo-500/5 focus:border-indigo-500/50 transition-all duration-200"
             />
-            {currentDueDate && (
+            {!readOnly && currentDueDate && (
               <Button
                 type="button"
                 variant="secondary"
@@ -195,10 +201,11 @@ export default function CardDetailModal({
             <input
               type="url"
               placeholder="https://example.com/image.jpg"
+              disabled={readOnly}
               {...register('coverUrl')}
               className="flex-1 py-3 px-4 rounded-[10px] text-theme-text dark:text-white text-[15px] bg-black/[0.02] dark:bg-white/[0.02] border border-black/[0.08] dark:border-white/[0.08] placeholder:text-theme-text-muted dark:placeholder:text-theme-dark-text-muted focus:outline-none focus:bg-indigo-500/5 focus:border-indigo-500/50 transition-all duration-200"
             />
-            {currentCoverUrl && (
+            {!readOnly && currentCoverUrl && (
               <Button
                 type="button"
                 variant="secondary"
@@ -238,23 +245,27 @@ export default function CardDetailModal({
 
         {/* Actions */}
         <div className="flex gap-3">
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={onDelete}
-            disabled={isDeleting}
-            className="!bg-red-500/10 !text-red-500 hover:!bg-red-500/20 !border-red-500/20"
-          >
-            <TrashIcon size={16} className="mr-1.5" />
-            {isDeleting ? 'Deleting...' : 'Delete'}
-          </Button>
+          {!readOnly && (
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={onDelete}
+              disabled={isDeleting}
+              className="!bg-red-500/10 !text-red-500 hover:!bg-red-500/20 !border-red-500/20"
+            >
+              <TrashIcon size={16} className="mr-1.5" />
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </Button>
+          )}
           <div className="flex-1" />
           <Button type="button" variant="secondary" onClick={handleClose}>
-            Cancel
+            {readOnly ? 'Close' : 'Cancel'}
           </Button>
-          <Button type="submit" variant="gradient" loading={isUpdating} disabled={!isDirty}>
-            {isUpdating ? 'Saving...' : 'Save'}
-          </Button>
+          {!readOnly && (
+            <Button type="submit" variant="gradient" loading={isUpdating} disabled={!isDirty}>
+              {isUpdating ? 'Saving...' : 'Save'}
+            </Button>
+          )}
         </div>
       </form>
     </Modal>
