@@ -284,12 +284,14 @@ export async function reorderCards(
       return null
     }
 
-    for (let index = 0; index < data.cardIds.length; index++) {
-      await tx.card.update({
-        where: { id: data.cardIds[index] },
-        data: { position: index },
-      })
-    }
+    await Promise.all(
+      data.cardIds.map((id, index) =>
+        tx.card.update({
+          where: { id },
+          data: { position: index },
+        })
+      )
+    )
 
     return tx.card.findMany({
       where: { listId },

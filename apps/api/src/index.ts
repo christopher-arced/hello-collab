@@ -13,9 +13,11 @@ if (!process.env.JWT_SECRET) {
 const app = createApp()
 const httpServer = createServer(app)
 
+const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:5173'
+
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    origin: corsOrigin,
     credentials: true,
   },
 })

@@ -8,7 +8,8 @@ export interface User {
   updatedAt: Date
 }
 
-export interface UserWithoutPassword extends Omit<User, 'password'> {}
+/** User type safe for API responses (same as User since passwordHash is excluded from this type) */
+export type UserWithoutPassword = User
 
 // Board Types
 export enum Role {
@@ -106,95 +107,6 @@ export interface SocketUser {
   id: string
   name: string
   avatarUrl: string | null
-}
-
-// Board Events
-export interface BoardUpdateEvent {
-  boardId: string
-  updates: Partial<Board>
-}
-
-export interface BoardDeleteEvent {
-  boardId: string
-}
-
-// List Events
-export interface ListCreateEvent {
-  boardId: string
-  list: List
-}
-
-export interface ListUpdateEvent {
-  listId: string
-  updates: Partial<List>
-}
-
-export interface ListDeleteEvent {
-  listId: string
-}
-
-export interface ListReorderEvent {
-  boardId: string
-  listIds: string[]
-}
-
-// Card Events
-export interface CardCreateEvent {
-  listId: string
-  card: Card
-}
-
-export interface CardUpdateEvent {
-  cardId: string
-  updates: Partial<Card>
-}
-
-export interface CardDeleteEvent {
-  cardId: string
-}
-
-export interface CardMoveEvent {
-  cardId: string
-  fromListId: string
-  toListId: string
-  position: number
-}
-
-export interface CardReorderEvent {
-  listId: string
-  cardIds: string[]
-}
-
-// Presence Events
-export interface UserTypingEvent {
-  cardId: string
-  userId: string
-}
-
-export interface UserEditingEvent {
-  cardId: string
-  userId: string
-}
-
-export interface ActiveUsersEvent {
-  boardId: string
-  users: SocketUser[]
-}
-
-// Socket Event Payloads (with userId from server)
-export interface ServerBoardEvent {
-  board: Board
-  userId: string
-}
-
-export interface ServerListEvent {
-  list: List
-  userId: string
-}
-
-export interface ServerCardEvent {
-  card: Card
-  userId: string
 }
 
 // Error Types

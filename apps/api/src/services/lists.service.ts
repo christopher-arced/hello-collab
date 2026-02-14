@@ -117,12 +117,14 @@ export async function reorderLists(
       return null
     }
 
-    for (let index = 0; index < data.listIds.length; index++) {
-      await tx.list.update({
-        where: { id: data.listIds[index] },
-        data: { position: index },
-      })
-    }
+    await Promise.all(
+      data.listIds.map((id, index) =>
+        tx.list.update({
+          where: { id },
+          data: { position: index },
+        })
+      )
+    )
 
     return tx.list.findMany({
       where: { boardId },

@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express'
-import { createBoardSchema, updateBoardSchema } from '@hello/validation'
+import type { CreateBoardInput, UpdateBoardInput } from '@hello/validation'
 import type { ApiResponse, Board } from '@hello/types'
 import {
   createBoard,
@@ -26,17 +26,7 @@ export async function getBoards(req: Request, res: Response) {
 
 export async function create(req: Request, res: Response) {
   try {
-    const result = createBoardSchema.safeParse(req.body)
-
-    if (!result.success) {
-      return res.status(400).json({
-        success: false,
-        error: 'Validation failed',
-        details: result.error.flatten().fieldErrors as Record<string, string[]>,
-      } satisfies ApiResponse)
-    }
-
-    const board = await createBoard(result.data, req.user!.id)
+    const board = await createBoard(req.body as CreateBoardInput, req.user!.id)
 
     return res.status(201).json({
       success: true,
@@ -76,17 +66,7 @@ export async function getBoard(req: Request, res: Response) {
 export async function update(req: Request, res: Response) {
   try {
     const { id } = req.params
-    const result = updateBoardSchema.safeParse(req.body)
-
-    if (!result.success) {
-      return res.status(400).json({
-        success: false,
-        error: 'Validation failed',
-        details: result.error.flatten().fieldErrors as Record<string, string[]>,
-      } satisfies ApiResponse)
-    }
-
-    const board = await updateBoard(id, req.user!.id, result.data)
+    const board = await updateBoard(id, req.user!.id, req.body as UpdateBoardInput)
 
     if (!board) {
       return res.status(404).json({

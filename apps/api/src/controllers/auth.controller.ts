@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express'
 import { Prisma } from '@prisma/client'
-import { registerSchema, loginSchema } from '@hello/validation'
+import type { RegisterInput, LoginInput } from '@hello/validation'
 import type { ApiResponse, User } from '@hello/types'
 import {
   createUser,
@@ -23,17 +23,7 @@ const COOKIE_OPTIONS = {
 
 export async function register(req: Request, res: Response) {
   try {
-    const result = registerSchema.safeParse(req.body)
-
-    if (!result.success) {
-      return res.status(400).json({
-        success: false,
-        error: 'Validation failed',
-        details: result.error.flatten().fieldErrors as Record<string, string[]>,
-      } satisfies ApiResponse)
-    }
-
-    const { email, password, name } = result.data
+    const { email, password, name } = req.body as RegisterInput
 
     const existingUser = await findUserByEmail(email)
     if (existingUser) {
@@ -70,17 +60,7 @@ export async function register(req: Request, res: Response) {
 
 export async function login(req: Request, res: Response) {
   try {
-    const result = loginSchema.safeParse(req.body)
-
-    if (!result.success) {
-      return res.status(400).json({
-        success: false,
-        error: 'Validation failed',
-        details: result.error.flatten().fieldErrors as Record<string, string[]>,
-      } satisfies ApiResponse)
-    }
-
-    const { email, password } = result.data
+    const { email, password } = req.body as LoginInput
 
     const user = await findUserByEmail(email)
 

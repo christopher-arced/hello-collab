@@ -215,7 +215,7 @@ describe('boardMembers.service', () => {
 
       const result = await addBoardMember('board-123', 'user-123', {
         email: 'new@example.com',
-        role: 'EDITOR',
+        role: Role.EDITOR,
       })
 
       expect(result).toHaveProperty('member')
@@ -266,7 +266,7 @@ describe('boardMembers.service', () => {
       vi.mocked(verifyBoardAccess).mockResolvedValue(mockNoAccess)
 
       const result = await updateMemberRole('board-123', 'user-123', 'target-user', {
-        role: 'EDITOR',
+        role: Role.EDITOR,
       })
 
       expect(result).toEqual({ error: 'Board not found or access denied' })
@@ -276,7 +276,7 @@ describe('boardMembers.service', () => {
       vi.mocked(verifyBoardAccess).mockResolvedValue(mockEditorAccess)
 
       const result = await updateMemberRole('board-123', 'user-123', 'target-user', {
-        role: 'VIEWER',
+        role: Role.VIEWER,
       })
 
       expect(result).toEqual({ error: 'Only board owners can change member roles' })
@@ -286,7 +286,7 @@ describe('boardMembers.service', () => {
       vi.mocked(verifyBoardAccess).mockResolvedValue(mockOwnerAccess)
 
       const result = await updateMemberRole('board-123', 'user-123', 'owner-123', {
-        role: 'EDITOR',
+        role: Role.EDITOR,
       })
 
       expect(result).toEqual({ error: 'Cannot demote the board owner. Transfer ownership first.' })
@@ -297,7 +297,7 @@ describe('boardMembers.service', () => {
       vi.mocked(prisma.boardMember.findUnique).mockResolvedValue(null)
 
       const result = await updateMemberRole('board-123', 'user-123', 'nonexistent-user', {
-        role: 'EDITOR',
+        role: Role.EDITOR,
       })
 
       expect(result).toEqual({ error: 'Member not found' })
@@ -310,7 +310,7 @@ describe('boardMembers.service', () => {
       vi.mocked(prisma.boardMember.update).mockResolvedValue(updatedMember as never)
 
       const result = await updateMemberRole('board-123', 'user-123', 'user-123', {
-        role: 'VIEWER',
+        role: Role.VIEWER,
       })
 
       expect(result).toHaveProperty('member')
@@ -330,7 +330,7 @@ describe('boardMembers.service', () => {
       vi.mocked(prisma.boardMember.update).mockResolvedValue(mockMember as never)
 
       const result = await updateMemberRole('board-123', 'user-123', 'owner-123', {
-        role: 'OWNER',
+        role: Role.OWNER,
       })
 
       expect(result).toHaveProperty('member')

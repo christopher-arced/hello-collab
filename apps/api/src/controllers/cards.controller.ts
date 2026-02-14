@@ -1,9 +1,9 @@
 import type { Request, Response } from 'express'
-import {
-  createCardSchema,
-  updateCardSchema,
-  moveCardSchema,
-  reorderCardsSchema,
+import type {
+  CreateCardInput,
+  UpdateCardInput,
+  MoveCardInput,
+  ReorderCardsInput,
 } from '@hello/validation'
 import type { ApiResponse, Card } from '@hello/types'
 import {
@@ -47,17 +47,7 @@ export async function getByList(req: Request, res: Response) {
 export async function create(req: Request, res: Response) {
   try {
     const { listId } = req.params
-    const validation = createCardSchema.safeParse(req.body)
-
-    if (!validation.success) {
-      return res.status(400).json({
-        success: false,
-        error: 'Validation failed',
-        details: validation.error.flatten().fieldErrors as Record<string, string[]>,
-      } satisfies ApiResponse)
-    }
-
-    const result = await createCard(listId, req.user!.id, validation.data)
+    const result = await createCard(listId, req.user!.id, req.body as CreateCardInput)
 
     if (!result) {
       return res.status(404).json({
@@ -85,17 +75,7 @@ export async function create(req: Request, res: Response) {
 export async function update(req: Request, res: Response) {
   try {
     const { id } = req.params
-    const validation = updateCardSchema.safeParse(req.body)
-
-    if (!validation.success) {
-      return res.status(400).json({
-        success: false,
-        error: 'Validation failed',
-        details: validation.error.flatten().fieldErrors as Record<string, string[]>,
-      } satisfies ApiResponse)
-    }
-
-    const result = await updateCard(id, req.user!.id, validation.data)
+    const result = await updateCard(id, req.user!.id, req.body as UpdateCardInput)
 
     if (!result) {
       return res.status(404).json({
@@ -145,17 +125,7 @@ export async function remove(req: Request, res: Response) {
 export async function move(req: Request, res: Response) {
   try {
     const { id } = req.params
-    const validation = moveCardSchema.safeParse(req.body)
-
-    if (!validation.success) {
-      return res.status(400).json({
-        success: false,
-        error: 'Validation failed',
-        details: validation.error.flatten().fieldErrors as Record<string, string[]>,
-      } satisfies ApiResponse)
-    }
-
-    const result = await moveCard(id, req.user!.id, validation.data)
+    const result = await moveCard(id, req.user!.id, req.body as MoveCardInput)
 
     if (!result) {
       return res.status(404).json({
@@ -180,17 +150,7 @@ export async function move(req: Request, res: Response) {
 export async function reorder(req: Request, res: Response) {
   try {
     const { listId } = req.params
-    const validation = reorderCardsSchema.safeParse(req.body)
-
-    if (!validation.success) {
-      return res.status(400).json({
-        success: false,
-        error: 'Validation failed',
-        details: validation.error.flatten().fieldErrors as Record<string, string[]>,
-      } satisfies ApiResponse)
-    }
-
-    const result = await reorderCards(listId, req.user!.id, validation.data)
+    const result = await reorderCards(listId, req.user!.id, req.body as ReorderCardsInput)
 
     if (!result) {
       return res.status(404).json({
