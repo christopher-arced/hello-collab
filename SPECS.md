@@ -484,7 +484,7 @@ PATCH  /api/boards/:id             - Update board
 DELETE /api/boards/:id             - Delete board
 ```
 
-#### Board Members (Phase 2)
+#### Board Members
 
 ```
 GET    /api/boards/:id/members     - Get board members
@@ -723,18 +723,18 @@ gray: { ...tailwind grays }
 - [x] Implement WebSocket events for all operations
 - [x] Real-time updates across clients
 - [x] Active users indicator
-- [ ] Loading states & error handling
-- [ ] Responsive design
-- [ ] Dark/light theme
+- [x] Loading states & error handling
+- [x] Responsive design
+- [x] Dark/light theme
 - [ ] Deploy to Vercel (frontend) + Render (backend)
 
 ### 8.2 Phase 2: Enhanced Collaboration (Week 4-5)
 
-- [ ] Board member invitations
-- [ ] Role-based permissions
+- [x] Board member invitations
+- [x] Role-based permissions
 - [ ] Card assignments
 - [ ] Card labels/tags
-- [ ] Card due dates
+- [x] Card due dates
 - [ ] File attachments (Cloudinary)
 - [ ] Comments on cards
 - [ ] Activity timeline
@@ -833,7 +833,7 @@ gray: { ...tailwind grays }
 - SQL injection protection (Prisma ORM)
 - XSS protection (React auto-escaping + DOMPurify for rich text)
 - CORS configuration (whitelist frontend domain)
-- Rate limiting (express-rate-limit): 100 req/15min per IP
+- Rate limiting (express-rate-limit): 300 req/15min per IP, 5 failed attempts/15min for auth
 
 ### 10.3 Scalability Considerations
 
@@ -1039,6 +1039,6 @@ gray: { ...tailwind grays }
 
 ---
 
-**Document Version:** 1.1
-**Last Updated:** 2026-01-02
-**Status:** ✅ Infrastructure Complete - Active Development
+**Document Version:** 1.2
+**Last Updated:** 2026-02-15
+**Status:** ✅ Phase 1 Complete, Phase 2 In Progress
