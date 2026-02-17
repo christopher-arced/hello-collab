@@ -1,4 +1,4 @@
-import { useEffect, useRef, ReactNode } from 'react'
+import { useEffect, useRef, useCallback, ReactNode } from 'react'
 
 interface ModalProps {
   isOpen: boolean
@@ -11,21 +11,52 @@ const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
   const overlayRef = useRef<HTMLDivElement>(null)
   const modalRef = useRef<HTMLDivElement>(null)
 
+  const trapFocus = useCallback((e: KeyboardEvent) => {
+    if (e.key !== 'Tab' || !modalRef.current) return
+
+    const candidates = modalRef.current.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )
+    const focusableElements = Array.from(candidates).filter(
+      (el) => el.offsetParent !== null && getComputedStyle(el).visibility !== 'hidden'
+    )
+    if (focusableElements.length === 0) {
+      if (e.key === 'Tab') return
+      return
+    }
+
+    const first = focusableElements[0]
+    const last = focusableElements[focusableElements.length - 1]
+
+    if (e.shiftKey) {
+      if (document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      }
+    } else {
+      if (document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
+  }, [])
+
   useEffect(() => {
     if (!isOpen) return
 
-    const handleEscape = (e: KeyboardEvent) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
+      trapFocus(e)
     }
 
-    document.addEventListener('keydown', handleEscape)
+    document.addEventListener('keydown', handleKeyDown)
     document.body.style.overflow = 'hidden'
 
     return () => {
-      document.removeEventListener('keydown', handleEscape)
+      document.removeEventListener('keydown', handleKeyDown)
       document.body.style.overflow = ''
     }
-  }, [isOpen, onClose])
+  }, [isOpen, onClose, trapFocus])
 
   useEffect(() => {
     if (isOpen && modalRef.current) {

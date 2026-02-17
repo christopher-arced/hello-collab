@@ -2,20 +2,22 @@ import { prisma } from '@hello/database'
 import type { CreateBoardInput, UpdateBoardInput } from '@hello/validation'
 import type { Board } from '@hello/types'
 
+const boardSelect = {
+  id: true,
+  title: true,
+  description: true,
+  bgColor: true,
+  ownerId: true,
+  createdAt: true,
+  updatedAt: true,
+} as const
+
 export async function findBoards(userId: string): Promise<Board[]> {
   return prisma.board.findMany({
     where: {
       OR: [{ ownerId: userId }, { members: { some: { userId } } }],
     },
-    select: {
-      id: true,
-      title: true,
-      description: true,
-      bgColor: true,
-      ownerId: true,
-      createdAt: true,
-      updatedAt: true,
-    },
+    select: boardSelect,
     orderBy: { updatedAt: 'desc' },
   })
 }
@@ -27,13 +29,7 @@ export async function findBoardById(boardId: string, userId: string): Promise<Bo
       OR: [{ ownerId: userId }, { members: { some: { userId } } }],
     },
     select: {
-      id: true,
-      title: true,
-      description: true,
-      bgColor: true,
-      ownerId: true,
-      createdAt: true,
-      updatedAt: true,
+      ...boardSelect,
       lists: {
         select: {
           id: true,
@@ -87,15 +83,7 @@ export async function updateBoard(
 
   return prisma.board.findUnique({
     where: { id: boardId },
-    select: {
-      id: true,
-      title: true,
-      description: true,
-      bgColor: true,
-      ownerId: true,
-      createdAt: true,
-      updatedAt: true,
-    },
+    select: boardSelect,
   })
 }
 
@@ -111,23 +99,13 @@ export async function deleteBoard(boardId: string, userId: string): Promise<bool
 }
 
 export async function createBoard(data: CreateBoardInput, ownerId: string): Promise<Board> {
-  const board = await prisma.board.create({
+  return prisma.board.create({
     data: {
       title: data.title,
       description: data.description ?? null,
       bgColor: data.bgColor ?? '#0079BF',
       ownerId,
     },
-    select: {
-      id: true,
-      title: true,
-      description: true,
-      bgColor: true,
-      ownerId: true,
-      createdAt: true,
-      updatedAt: true,
-    },
+    select: boardSelect,
   })
-
-  return board
 }

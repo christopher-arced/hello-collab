@@ -1,9 +1,10 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, memo } from 'react'
 import type { Card } from '@hello/types'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { DropdownMenu } from '../../common'
 import { DragIcon } from '../../icons'
+import { formatDueDate, getDueDateColor } from '@/utils/date'
 
 export interface CardItemProps {
   card: Card
@@ -16,29 +17,7 @@ export interface CardItemProps {
   isDeleting?: boolean
 }
 
-function formatDueDate(date: Date): string {
-  const now = new Date()
-  const dueDate = new Date(date)
-  const diffDays = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-
-  if (diffDays < 0) return 'Overdue'
-  if (diffDays === 0) return 'Today'
-  if (diffDays === 1) return 'Tomorrow'
-  return dueDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-}
-
-function getDueDateColor(date: Date): string {
-  const now = new Date()
-  const dueDate = new Date(date)
-  const diffDays = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-
-  if (diffDays < 0) return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-  if (diffDays <= 1)
-    return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-  return 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
-}
-
-export default function CardItem({
+function CardItem({
   card,
   listId,
   canEdit,
@@ -120,6 +99,7 @@ export default function CardItem({
           {canEdit !== false && (
             <button
               type="button"
+              aria-label="Drag to reorder card"
               className="opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing p-0.5 -ml-0.5 mr-0.5 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 touch-none transition-opacity"
               {...attributes}
               {...listeners}
@@ -193,3 +173,5 @@ export default function CardItem({
     </div>
   )
 }
+
+export default memo(CardItem)

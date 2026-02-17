@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { Role } from '@hello/types'
 
 // Auth Schemas
 export const registerSchema = z.object({
@@ -103,11 +104,11 @@ export const reorderCardsSchema = z.object({
 // Board Member Schemas (Phase 2)
 export const addBoardMemberSchema = z.object({
   email: z.string().email('Invalid email address').toLowerCase(),
-  role: z.enum(['EDITOR', 'VIEWER']).optional(),
+  role: z.enum([Role.EDITOR, Role.VIEWER]).optional(),
 })
 
 export const updateBoardMemberSchema = z.object({
-  role: z.enum(['OWNER', 'EDITOR', 'VIEWER']),
+  role: z.nativeEnum(Role),
 })
 
 // Common Schemas

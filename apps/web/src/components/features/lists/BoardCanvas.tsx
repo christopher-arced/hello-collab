@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import type { List, Card } from '@hello/types'
 import {
   DndContext,
@@ -244,6 +244,7 @@ export default function BoardCanvas({
     }
   }
 
+  const listIds = useMemo(() => localLists.map((l) => l.id), [localLists])
   const activeList = activeType === 'list' ? localLists.find((l) => l.id === activeId) : null
 
   return (
@@ -255,7 +256,7 @@ export default function BoardCanvas({
       onDragEnd={handleDragEnd}
     >
       <div
-        className="flex-1 p-6 overflow-x-auto bg-gray-50 dark:bg-gray-900/50"
+        className="flex-1 p-3 md:p-6 overflow-x-auto bg-gray-50 dark:bg-gray-900/50"
         style={{ backgroundColor: `${boardColor}10` }}
       >
         <div className="flex gap-4 items-start h-full">
@@ -270,10 +271,7 @@ export default function BoardCanvas({
             </div>
           ) : (
             <>
-              <SortableContext
-                items={localLists.map((l) => l.id)}
-                strategy={horizontalListSortingStrategy}
-              >
+              <SortableContext items={listIds} strategy={horizontalListSortingStrategy}>
                 {localLists.map((list) => (
                   <ListCard
                     key={list.id}

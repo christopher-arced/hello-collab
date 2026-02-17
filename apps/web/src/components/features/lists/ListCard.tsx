@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, memo } from 'react'
 import type { List, Card } from '@hello/types'
 import type { UpdateCardInput } from '@hello/validation'
 import { useDroppable, useDndContext } from '@dnd-kit/core'
@@ -19,7 +19,7 @@ export interface ListCardProps {
   dropIndicatorCardId?: string | null
 }
 
-export default function ListCard({
+function ListCard({
   list,
   canEdit,
   onUpdateTitle,
@@ -164,6 +164,7 @@ export default function ListCard({
         {canEdit !== false && (
           <button
             type="button"
+            aria-label="Drag to reorder list"
             className="cursor-grab active:cursor-grabbing p-1 -ml-1 mr-1 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 touch-none"
             {...attributes}
             {...listeners}
@@ -305,3 +306,5 @@ export default function ListCard({
     </div>
   )
 }
+
+export default memo(ListCard)

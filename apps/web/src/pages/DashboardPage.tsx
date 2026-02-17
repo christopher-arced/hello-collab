@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Sidebar from '@/components/common/Sidebar'
 import { UserAvatar } from '@/components/common'
-import { CreateIcon } from '@/components/icons'
+import { CreateIcon, MenuIcon } from '@/components/icons'
 import { useAuthStore } from '@/stores'
 import { useBoards } from '@/hooks/useBoards'
 import CreateBoardModal from '@/components/features/boards/CreateBoardModal'
@@ -22,6 +22,7 @@ const activities = [
 
 export default function DashboardPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const navigate = useNavigate()
   const user = useAuthStore((state) => state.user)
   const { boards, isLoading } = useBoards()
@@ -29,31 +30,41 @@ export default function DashboardPage() {
 
   return (
     <div className="h-screen max-h-screen bg-theme-bg dark:bg-theme-dark-bg flex">
-      <Sidebar />
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
-      <main className="flex-1 p-8 overflow-y-auto">
+      <main className="flex-1 p-4 md:p-8 overflow-y-auto">
         <div className="max-w-[1200px] mx-auto">
           {/* Welcome Header */}
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-[28px] font-semibold text-theme-text dark:text-theme-dark-text">
-                Good afternoon, {firstName}
-              </h1>
-              <p className="text-[15px] text-theme-text-secondary dark:text-theme-dark-text-secondary mt-2">
-                Here's what's happening with your projects today.
-              </p>
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6 md:mb-8">
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                aria-label="Open menu"
+                onClick={() => setIsSidebarOpen(true)}
+                className="md:hidden w-9 h-9 rounded-lg flex items-center justify-center bg-theme-bg-hover dark:bg-theme-dark-bg-hover border border-theme-border dark:border-theme-dark-border text-theme-text-secondary dark:text-theme-dark-text-secondary cursor-pointer hover:text-theme-text dark:hover:text-theme-dark-text transition-colors"
+              >
+                <MenuIcon size={20} />
+              </button>
+              <div>
+                <h1 className="text-2xl md:text-[28px] font-semibold text-theme-text dark:text-theme-dark-text">
+                  Good afternoon, {firstName}
+                </h1>
+                <p className="text-[15px] text-theme-text-secondary dark:text-theme-dark-text-secondary mt-1 md:mt-2">
+                  Here's what's happening with your projects today.
+                </p>
+              </div>
             </div>
             <button
               type="button"
               onClick={() => setIsCreateModalOpen(true)}
-              className="px-5 py-3 bg-theme-gradient border-none rounded-[10px] text-white text-sm font-medium cursor-pointer flex items-center gap-2 shadow-accent-glow-dark hover:opacity-90 transition-opacity"
+              className="px-5 py-3 bg-theme-gradient border-none rounded-[10px] text-white text-sm font-medium cursor-pointer flex items-center justify-center gap-2 shadow-accent-glow-dark hover:opacity-90 transition-opacity w-full md:w-auto"
             >
               <CreateIcon size={16} /> New Board
             </button>
           </div>
 
           {/* Boards Section */}
-          <div className="mb-8">
+          <div className="mb-6 md:mb-8">
             <h2 className="text-lg font-semibold text-theme-text dark:text-theme-dark-text mb-4">
               Recent Boards
             </h2>
@@ -142,7 +153,7 @@ export default function DashboardPage() {
             </h2>
             <div className="bg-theme-bg-card dark:bg-theme-dark-bg-card border border-theme-border dark:border-theme-dark-border rounded-2xl divide-y divide-theme-border dark:divide-theme-dark-border">
               {activities.map((activity, i) => (
-                <div key={i} className="px-5 py-4 flex items-center gap-3">
+                <div key={i} className="px-3 py-3 md:px-5 md:py-4 flex items-center gap-3">
                   <UserAvatar name={activity.user} />
                   <p className="flex-1 text-sm text-theme-text-secondary dark:text-theme-dark-text-secondary">
                     <span className="text-theme-text dark:text-theme-dark-text font-medium">
@@ -162,7 +173,7 @@ export default function DashboardPage() {
                       </>
                     )}
                   </p>
-                  <span className="text-xs text-theme-text-muted dark:text-theme-dark-text-muted">
+                  <span className="text-xs text-theme-text-muted dark:text-theme-dark-text-muted hidden sm:inline">
                     {activity.time}
                   </span>
                 </div>

@@ -12,6 +12,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@hello/types": "workspace:*",
     "zod": "^3.22.4"
   },
   "devDependencies": {

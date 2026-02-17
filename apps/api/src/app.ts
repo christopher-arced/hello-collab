@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
+import { apiRateLimit } from './middleware/rateLimit'
 import authRoutes from './routes/auth'
 import boardsRoutes from './routes/boards'
 import boardMembersRoutes from './routes/boardMembers'
@@ -10,15 +11,21 @@ import cardsRoutes from './routes/cards'
 export function createApp() {
   const app = express()
 
+  if (process.env.NODE_ENV === 'production' && !process.env.CORS_ORIGIN) {
+    throw new Error('CORS_ORIGIN environment variable is required in production')
+  }
+  const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:5173'
+
   app.use(
     cors({
-      origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+      origin: corsOrigin,
       credentials: true,
     })
   )
   app.use(cookieParser())
   app.use(express.json())
   app.use(express.urlencoded({ extended: true }))
+  app.use('/api', apiRateLimit)
 
   app.get('/health', (_req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() })

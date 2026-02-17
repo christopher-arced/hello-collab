@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { addBoardMemberSchema, AddBoardMemberInput } from '@hello/validation'
-import type { BoardMember } from '@hello/types'
+import { Role, type BoardMember } from '@hello/types'
 import { Input, Button } from '@/components/common'
 import { ApiError } from '@/lib/api'
 
@@ -22,7 +22,7 @@ export function AddMemberForm({ onSubmit, isLoading, error, memberEmails }: AddM
     formState: { errors },
   } = useForm<AddBoardMemberInput>({
     resolver: zodResolver(addBoardMemberSchema),
-    defaultValues: { role: 'VIEWER' },
+    defaultValues: { role: Role.VIEWER },
   })
 
   const handleFormSubmit = async (data: AddBoardMemberInput) => {
@@ -57,13 +57,13 @@ export function AddMemberForm({ onSubmit, isLoading, error, memberEmails }: AddM
           className="px-3 py-2 rounded-lg text-sm bg-white dark:bg-gray-800 border border-black/10 dark:border-white/10 text-theme-text dark:text-theme-dark-text focus:outline-none focus:border-indigo-500/50"
         >
           <option
-            value="VIEWER"
+            value={Role.VIEWER}
             className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
           >
             Viewer
           </option>
           <option
-            value="EDITOR"
+            value={Role.EDITOR}
             className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
           >
             Editor

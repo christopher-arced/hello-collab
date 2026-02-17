@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import type { SocketUser } from '@hello/types'
 import Sidebar from '@/components/common/Sidebar'
-import { Button, ConfirmModal } from '@/components/common'
+import { Button, ConfirmModal, ErrorBoundary } from '@/components/common'
 import { BoardCanvas } from '@/components/features/lists'
 import { BoardHeader } from '@/components/features/board/BoardHeader'
 import { EditBoardModal } from '@/components/features/board/EditBoardModal'
@@ -21,6 +21,7 @@ export default function BoardPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [isMembersPanelOpen, setIsMembersPanelOpen] = useState(false)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [activeUsers, setActiveUsers] = useState<SocketUser[]>([])
 
   // Handle being removed from board - navigate away
@@ -108,8 +109,8 @@ export default function BoardPage() {
   if (isLoading) {
     return (
       <div className="h-screen max-h-screen bg-theme-bg dark:bg-theme-dark-bg flex">
-        <Sidebar />
-        <main className="flex-1 p-8 overflow-y-auto">
+        <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+        <main className="flex-1 p-4 md:p-8 overflow-y-auto">
           <div className="max-w-[1200px] mx-auto animate-pulse">
             <div className="h-8 bg-black/10 dark:bg-white/10 rounded w-48 mb-4" />
             <div className="h-4 bg-black/10 dark:bg-white/10 rounded w-96" />
@@ -122,8 +123,8 @@ export default function BoardPage() {
   if (error || !board) {
     return (
       <div className="h-screen max-h-screen bg-theme-bg dark:bg-theme-dark-bg flex">
-        <Sidebar />
-        <main className="flex-1 p-8 overflow-y-auto">
+        <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+        <main className="flex-1 p-4 md:p-8 overflow-y-auto">
           <div className="max-w-[1200px] mx-auto text-center py-20">
             <h1 className="text-2xl font-semibold text-theme-text dark:text-theme-dark-text mb-2">
               Board not found
@@ -142,7 +143,7 @@ export default function BoardPage() {
 
   return (
     <div className="h-screen max-h-screen bg-theme-bg dark:bg-theme-dark-bg flex">
-      <Sidebar />
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
       <main className="flex-1 flex flex-col overflow-hidden">
         <BoardHeader
@@ -154,24 +155,43 @@ export default function BoardPage() {
           onEdit={() => setIsEditModalOpen(true)}
           onDelete={() => setIsDeleteModalOpen(true)}
           onShare={() => setIsMembersPanelOpen(true)}
+          onMenuToggle={() => setIsSidebarOpen(true)}
         />
 
         {/* Board Content - Lists */}
-        <BoardCanvas
-          lists={lists}
-          boardColor={board.bgColor}
-          isLoading={isLoadingLists}
-          canEdit={canEdit}
-          onCreateList={handleCreateList}
-          onUpdateList={handleUpdateList}
-          onDeleteList={handleDeleteList}
-          onReorderLists={handleReorderLists}
-          onReorderCards={handleReorderCards}
-          onMoveCard={handleMoveCard}
-          isCreating={isCreatingList}
-          isUpdating={isUpdatingList}
-          isDeleting={isDeletingList}
-        />
+        <ErrorBoundary
+          fallback={
+            <div className="flex-1 flex items-center justify-center p-8">
+              <div className="text-center">
+                <h2 className="text-lg font-semibold text-theme-text dark:text-theme-dark-text mb-2">
+                  Something went wrong
+                </h2>
+                <p className="text-theme-text-secondary dark:text-theme-dark-text-secondary mb-4">
+                  The board encountered an error.
+                </p>
+                <Button variant="primary" onClick={() => window.location.reload()}>
+                  Reload
+                </Button>
+              </div>
+            </div>
+          }
+        >
+          <BoardCanvas
+            lists={lists}
+            boardColor={board.bgColor}
+            isLoading={isLoadingLists}
+            canEdit={canEdit}
+            onCreateList={handleCreateList}
+            onUpdateList={handleUpdateList}
+            onDeleteList={handleDeleteList}
+            onReorderLists={handleReorderLists}
+            onReorderCards={handleReorderCards}
+            onMoveCard={handleMoveCard}
+            isCreating={isCreatingList}
+            isUpdating={isUpdatingList}
+            isDeleting={isDeletingList}
+          />
+        </ErrorBoundary>
       </main>
 
       {canEdit && (

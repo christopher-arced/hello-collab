@@ -18,6 +18,11 @@ interface NavAction {
   badge?: number
 }
 
+interface SidebarProps {
+  isOpen?: boolean
+  onClose?: () => void
+}
+
 const navLinks: NavLink[] = [{ icon: HomeIcon, label: 'Home', path: '/' }]
 
 const navActions: NavAction[] = [
@@ -32,7 +37,7 @@ const inactiveStyles =
   'text-theme-text-secondary dark:text-theme-dark-text-secondary hover:text-theme-text dark:hover:text-theme-dark-text hover:bg-theme-bg-hover dark:hover:bg-theme-dark-bg-hover'
 const activeStyles = 'bg-theme-accent dark:bg-theme-dark-accent text-white'
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const { logout } = useAuth()
   const { user } = useAuthStore()
   const { resolvedTheme, toggleTheme } = useThemeStore()
@@ -46,8 +51,19 @@ const Sidebar = () => {
     [location.pathname]
   )
 
-  return (
-    <aside className="w-[72px] min-h-screen bg-theme-bg-secondary dark:bg-theme-dark-bg-secondary border-r border-solid border-theme-border dark:border-theme-dark-border flex flex-col items-center py-4 gap-2">
+  const handleNavClick = () => {
+    onClose?.()
+  }
+
+  const sidebarContent = (
+    <aside
+      className={`w-[72px] min-h-screen bg-theme-bg-secondary dark:bg-theme-dark-bg-secondary border-r border-solid border-theme-border dark:border-theme-dark-border flex flex-col items-center py-4 gap-2 ${
+        onClose
+          ? 'fixed inset-y-0 left-0 z-50 transition-transform duration-200 ease-in-out md:static md:translate-x-0 ' +
+            (isOpen ? 'translate-x-0' : '-translate-x-full')
+          : 'hidden md:flex'
+      }`}
+    >
       <Logo size="sm" showText={false} />
 
       <nav className="flex flex-col items-center gap-2">
@@ -58,6 +74,7 @@ const Sidebar = () => {
             aria-label={item.label}
             title={item.label}
             className={`${baseButtonStyles} ${isActive(item.path) ? activeStyles : inactiveStyles}`}
+            onClick={handleNavClick}
           >
             <item.icon />
           </Link>
@@ -110,6 +127,26 @@ const Sidebar = () => {
       </button>
     </aside>
   )
+
+  // When controlled (has onClose), render with a backdrop on mobile
+  if (onClose) {
+    return (
+      <>
+        {/* Backdrop */}
+        {isOpen && (
+          <div
+            className="fixed inset-0 bg-black/50 z-40 md:hidden"
+            onClick={onClose}
+            aria-hidden="true"
+          />
+        )}
+        {sidebarContent}
+      </>
+    )
+  }
+
+  // Uncontrolled: always visible on desktop, hidden on mobile (original behavior)
+  return sidebarContent
 }
 
 export default Sidebar
