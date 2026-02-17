@@ -20,7 +20,10 @@ const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
     const focusableElements = Array.from(candidates).filter(
       (el) => el.offsetParent !== null && getComputedStyle(el).visibility !== 'hidden'
     )
-    if (focusableElements.length === 0) return
+    if (focusableElements.length === 0) {
+      if (e.key === 'Tab') return
+      return
+    }
 
     const first = focusableElements[0]
     const last = focusableElements[focusableElements.length - 1]

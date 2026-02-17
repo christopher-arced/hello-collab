@@ -1,8 +1,12 @@
 import type { Server } from 'socket.io'
 import { socketAuthMiddleware, type SocketData } from '../middleware/socketAuth'
+import { socketRateLimitMiddleware } from '../middleware/socketRateLimit'
 import { registerBoardHandlers } from './board.socket'
 
 export function registerSocketHandlers(io: Server): void {
+  // Apply connection rate limiting before authentication
+  io.use(socketRateLimitMiddleware)
+
   // Apply authentication middleware
   io.use(socketAuthMiddleware)
 
