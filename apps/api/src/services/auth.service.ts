@@ -66,6 +66,24 @@ export async function findUserById(id: string): Promise<Omit<User, 'passwordHash
   })
 }
 
+export async function updateUserAvatar(
+  userId: string,
+  avatarUrl: string | null
+): Promise<Omit<User, 'passwordHash'>> {
+  return prisma.user.update({
+    where: { id: userId },
+    data: { avatarUrl },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      avatarUrl: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  })
+}
+
 export type TokenVerifyResult = { valid: true; userId: string } | { valid: false; expired: boolean }
 
 export function verifyToken(token: string): TokenVerifyResult {

@@ -1,9 +1,10 @@
 import { Link, useLocation } from 'react-router-dom'
-import { useCallback } from 'react'
+import { useCallback, useRef } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthStore, useThemeStore } from '@/stores'
-import { getInitials } from '@/utils'
 import Logo from '../features/auth/Logo'
+import { Avatar } from './Avatar'
+import { API_BASE_URL } from '@/lib/api'
 import { HomeIcon, NotificationsIcon, SettingsIcon, MoonIcon, SunIcon, LogoutIcon } from '../icons'
 
 interface NavLink {
@@ -38,8 +39,9 @@ const inactiveStyles =
 const activeStyles = 'bg-theme-accent dark:bg-theme-dark-accent text-white'
 
 const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
-  const { logout } = useAuth()
+  const { logout, uploadAvatar, isUploadingAvatar } = useAuth()
   const { user } = useAuthStore()
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const { resolvedTheme, toggleTheme } = useThemeStore()
   const location = useLocation()
 
@@ -110,12 +112,33 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
         {resolvedTheme === 'dark' ? <MoonIcon /> : <SunIcon />}
       </button>
 
-      <div
-        className="w-11 h-11 bg-theme-gradient rounded-full flex items-center justify-center text-sm font-semibold text-white cursor-pointer"
+      <button
+        type="button"
+        aria-label="Change avatar"
         title={user?.name ?? 'User'}
+        onClick={() => fileInputRef.current?.click()}
+        className={`border-none bg-transparent p-0 cursor-pointer rounded-full ${isUploadingAvatar ? 'opacity-50' : ''}`}
+        disabled={isUploadingAvatar}
       >
-        {user?.name ? getInitials(user.name) : '??'}
-      </div>
+        <Avatar
+          name={user?.name ?? 'User'}
+          avatarUrl={user?.avatarUrl ? `${API_BASE_URL}${user.avatarUrl}` : null}
+          size="md"
+        />
+      </button>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/gif"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0]
+          if (file) {
+            uploadAvatar(file)
+            e.target.value = ''
+          }
+        }}
+      />
 
       <button
         aria-label="Logout"
