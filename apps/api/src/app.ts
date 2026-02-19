@@ -1,4 +1,6 @@
 import express from 'express'
+import path from 'path'
+import { fileURLToPath } from 'url'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import { apiRateLimit } from './middleware/rateLimit'
@@ -7,6 +9,8 @@ import boardsRoutes from './routes/boards'
 import boardMembersRoutes from './routes/boardMembers'
 import listsRoutes from './routes/lists'
 import cardsRoutes from './routes/cards'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export function createApp() {
   const app = express()
@@ -26,6 +30,7 @@ export function createApp() {
   app.use(express.json())
   app.use(express.urlencoded({ extended: true }))
   app.use('/api', apiRateLimit)
+  app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')))
 
   app.get('/health', (_req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() })

@@ -44,5 +44,8 @@ lerna-debug.log*
 *.db
 *.db-journal
 
+# Uploads
+uploads/
+
 # OS
 Thumbs.db

@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import type { AuthResponse, User, RegisterCredentials, LoginCredentials } from '@hello/types'
-import { fetcher, ApiError } from '../lib/api'
+import { fetcher, uploadFile, ApiError } from '../lib/api'
 import { useAuthStore } from '../stores'
 
 const AUTH_KEYS = {
@@ -84,6 +84,22 @@ export function useAuth() {
     },
   })
 
+  const uploadAvatarMutation = useMutation({
+    mutationFn: (file: File) => uploadFile<{ user: User }>('/api/auth/avatar', file, 'avatar'),
+    onSuccess: (data) => {
+      setUser(data.user)
+      queryClient.setQueryData(AUTH_KEYS.user, data.user)
+    },
+  })
+
+  const removeAvatarMutation = useMutation({
+    mutationFn: () => fetcher<{ user: User }>('/api/auth/avatar', { method: 'DELETE' }),
+    onSuccess: (data) => {
+      setUser(data.user)
+      queryClient.setQueryData(AUTH_KEYS.user, data.user)
+    },
+  })
+
   return {
     user,
     isAuthenticated,
@@ -101,5 +117,9 @@ export function useAuth() {
 
     logout: logoutMutation.mutate,
     isLoggingOut: logoutMutation.isPending,
+
+    uploadAvatar: uploadAvatarMutation.mutate,
+    isUploadingAvatar: uploadAvatarMutation.isPending,
+    removeAvatar: removeAvatarMutation.mutate,
   }
 }

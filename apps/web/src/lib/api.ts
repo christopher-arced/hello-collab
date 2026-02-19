@@ -34,3 +34,22 @@ export async function fetcher<T>(endpoint: string, options: RequestInit = {}): P
 
   return data.data as T
 }
+
+export async function uploadFile<T>(endpoint: string, file: File, fieldName: string): Promise<T> {
+  const formData = new FormData()
+  formData.append(fieldName, file)
+
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    method: 'POST',
+    credentials: 'include',
+    body: formData,
+  })
+
+  const data: ApiResponse<T> = await response.json()
+
+  if (!response.ok || !data.success) {
+    throw new ApiError(data.error || 'Upload failed', response.status, data.details)
+  }
+
+  return data.data as T
+}

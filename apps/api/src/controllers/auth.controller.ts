@@ -1,13 +1,20 @@
 import type { Request, Response } from 'express'
 import { Prisma } from '@prisma/client'
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
 import type { RegisterInput, LoginInput } from '@hello/validation'
 import type { ApiResponse, User } from '@hello/types'
 import {
   createUser,
   generateTokens,
   findUserByEmail,
+  findUserById,
   verifyPassword,
+  updateUserAvatar,
 } from '../services/auth.service'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const COOKIE_BASE = {
   httpOnly: true,
@@ -115,4 +122,72 @@ export function getCurrentUser(req: Request, res: Response) {
     success: true,
     data: req.user,
   } satisfies ApiResponse<Omit<User, 'passwordHash'>>)
+}
+
+function deleteAvatarFile(avatarUrl: string) {
+  try {
+    const filePath = path.join(__dirname, '..', '..', avatarUrl)
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath)
+    }
+  } catch {
+    // Non-critical — log but don't fail the request
+    console.error('Failed to delete old avatar file:', avatarUrl)
+  }
+}
+
+export async function uploadAvatar(req: Request, res: Response) {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        error: 'No file uploaded',
+      } satisfies ApiResponse)
+    }
+
+    const userId = req.user!.id
+    const currentUser = await findUserById(userId)
+
+    if (currentUser?.avatarUrl) {
+      deleteAvatarFile(currentUser.avatarUrl)
+    }
+
+    const avatarUrl = `/uploads/avatars/${req.file.filename}`
+    const user = await updateUserAvatar(userId, avatarUrl)
+
+    return res.status(200).json({
+      success: true,
+      data: { user },
+    } satisfies ApiResponse<{ user: Omit<User, 'passwordHash'> }>)
+  } catch (error) {
+    console.error('Avatar upload error:', error)
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to upload avatar',
+    } satisfies ApiResponse)
+  }
+}
+
+export async function removeAvatar(req: Request, res: Response) {
+  try {
+    const userId = req.user!.id
+    const currentUser = await findUserById(userId)
+
+    if (currentUser?.avatarUrl) {
+      deleteAvatarFile(currentUser.avatarUrl)
+    }
+
+    const user = await updateUserAvatar(userId, null)
+
+    return res.status(200).json({
+      success: true,
+      data: { user },
+    } satisfies ApiResponse<{ user: Omit<User, 'passwordHash'> }>)
+  } catch (error) {
+    console.error('Avatar removal error:', error)
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to remove avatar',
+    } satisfies ApiResponse)
+  }
 }
